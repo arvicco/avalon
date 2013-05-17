@@ -1,29 +1,15 @@
 # Avalon
 
-TODO: Write a gem description
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'avalon'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install avalon
+Helper scripts for Bitcoin and Avalon miners management...
 
 ## Usage
 
-TODO: Write usage instructions here
+Scripts:
 
-## Contributing
+$ bin/monitor [last_ip]
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+- Monitors all miners from 151 to last_ip (default 182)
+
+$ mtgox_tx
+
+- Transcodes raw transaction from base64 (mtgox) to hex (blockchain) format
