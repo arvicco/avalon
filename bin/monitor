@@ -2,6 +2,7 @@
 # Script to monitor Avalon miners status and alert if something's wrong
 
 require 'pp'
+require 'time'
 
 # "STATUS=S,When=1368715953,Code=11,Msg=Summary,Description=cgminer 2.10.5|
 #  SUMMARY,Elapsed=58219,MHS av=70827.84,Found Blocks=0,Getworks=1899,Accepted=14755,
@@ -16,19 +17,19 @@ class Stat
 
   # Field formats: name => [width, pattern, type/conversion]
   FIELDS = { :mhs => [10, /MHS av=([\d\.]*)/, :f],
-               :up => [6, /Elapsed=([\d\.]*)/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
+               :uptime => [6, /Elapsed=([\d\.]*)/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
                :utility => [7, /,Utility=([\d\.]*)/, :f],
                :getworks => [8, /Getworks=([\d\.]*)/, :i],
                :accepted => [8, /,Accepted=([\d\.]*)/, :i],
                :rejected => [8, /Rejected=([\d\.]*)/, :i],
-               :stale => [8, /Stale=([\d\.]*)/, :i],
+               :stale => [6, /Stale=([\d\.]*)/, :i],
                :errors => [6, /Hardware Errors=([\d\.]*)/, :i],
                :blocks => [6, /Network Blocks=([\d\.]*)/, :i],
                :found => [2, /Found Blocks=([\d\.]*)/, :i],
             }
 
   def Stat.headers
-    "     " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
+    "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
   end
 
   def [] key
@@ -66,14 +67,18 @@ class Stat
 end
 
 # Sound alarm with message
-def alarm message, n=1
+def alarm message, tune="/System/Library/Sounds/Glass.aiff", n=1
   puts message
-  n.times { `afplay /System/Library/Sounds/Glass.aiff` }
+  n.times { `afplay #{tune}` }
 end
 
 # Collect miner stats for a set of miners
 def collect_stats miner_set, output=true
-  puts Stat.headers if output
+  if output
+    puts
+    puts "Miner status as of #{Time.now.getlocal.asctime}:"
+    puts Stat.headers
+  end
 
   Hash[
     *miner_set.map do |i|
@@ -95,8 +100,10 @@ def check_stats stats
   stats.each do |num, stat|
     if stat.data.empty?
       alarm "Miner #{num} did not respond to status query"
-    elsif stat[:mhs] < 64000
+    elsif stat[:mhs] < 60000 and stat[:uptime] > 0.1
       alarm "Miner #{num} performance too low: #{stat[:mhs]}"
+    elsif stat[:uptime] < 0.02
+      alarm "Miner #{num} restarted", "/System/Library/Sounds/Frog.aiff"
     end
   end
 end
@@ -105,6 +112,8 @@ end
 
 last = ARGV[1] || 182
 
-stats = collect_stats 151..last
-
-check_stats stats
+while true do
+  stats = collect_stats 151..last
+  check_stats stats
+  sleep 60
+end
