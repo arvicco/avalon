@@ -67,8 +67,10 @@ class Stat
 end
 
 # Sound alarm with message
-def alarm message, tune="/System/Library/Sounds/Glass.aiff", n=1
+def alarm message, tune="Glass.aiff", n=1
   puts message
+
+  tune = "/System/Library/Sounds/#{tune}" unless File.exist?(tune)
   n.times { `afplay #{tune}` }
 end
 
@@ -103,14 +105,14 @@ def check_stats stats
     elsif stat[:mhs] < 60000 and stat[:uptime] > 0.1
       alarm "Miner #{num} performance too low: #{stat[:mhs]}"
     elsif stat[:uptime] < 0.02
-      alarm "Miner #{num} restarted", "/System/Library/Sounds/Frog.aiff"
+      alarm "Miner #{num} restarted", "Frog.aiff"
     end
   end
 end
 
 ### Script begins
 
-last = ARGV[1] || 182
+last = (ARGV[0] || 182).to_i
 
 while true do
   stats = collect_stats 151..last
