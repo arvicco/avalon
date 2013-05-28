@@ -1,5 +1,5 @@
 require "avalon/version"
+require "avalon/monitor"
 
 module Avalon
-  # Your code goes here...
 end
