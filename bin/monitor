@@ -12,6 +12,8 @@ require 'avalon'
 
 last = (ARGV[0] || 182).to_i
 
-miners = (151..last).map {|i| Avalon::Miner.new(i)}
+nodes = (151..last).map {|i| Avalon::Miner.new(i)}
 
-Avalon::Monitor.new(miners).run
+nodes.push Avalon::Internet.new
+
+Avalon::Monitor.new(nodes).run

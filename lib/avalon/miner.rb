@@ -6,9 +6,8 @@ module Avalon
   #  Work Utility=992.58,Difficulty Accepted=944320.00000000,Difficulty Rejected=10368.00000000,
   #  Difficulty Stale=0.00000000,Best Share=7493180|\u0000"
 
-  class Miner
-
-    attr_accessor :data
+  # Miner is a node encapsulating a single Avalon unit
+  class Miner < Node
 
     # Field formats: name => [width, pattern, type/conversion]
     FIELDS = { :mhs => [10, /MHS av=([\d\.]*)/, :f],
@@ -28,18 +27,15 @@ module Avalon
       puts "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
-    def [] key
-      @data[key]
-    end
-
     # Extract stats from status string
     def initialize num
       @num = num
+      super()
     end
 
     def update_data status
       if status.empty? #
-        @data = {}
+        @data.clear
       else
         # Convert the status string into usable data pairs
         pairs = FIELDS.map do |name, (_, pattern, type)|
@@ -65,14 +61,6 @@ module Avalon
       update_data status
 
       puts "#{self}" if verbose
-    end
-
-    # Sound alarm with message
-    def alarm message, tune="Glass.aiff", n=1
-      puts message
-
-      tune = "/System/Library/Sounds/#{tune}" unless File.exist?(tune)
-      n.times { `afplay #{tune}` }
     end
 
     # Check for any exceptional situations in stats, sound alarm if any

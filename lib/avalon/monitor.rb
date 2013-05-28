@@ -1,10 +1,10 @@
-require "avalon/miner"
-
 module Avalon
+
   class Monitor
 
-    def initialize miners, verbose=true
-      @miners = miners
+    # List of nodes to monitor
+    def initialize nodes, verbose=true
+      @nodes = nodes
       @verbose = verbose
     end
 
@@ -13,11 +13,11 @@ module Avalon
 
         Avalon::Miner.print_headers if @verbose
 
-        # Update miner status
-        @miners.each {|miner| miner.check_status(@verbose)}
+        # Check status for all nodes
+        @nodes.each {|node| node.check_status(@verbose)}
 
-        # Report miner errors (if any)
-        @miners.each {|miner| miner.report_errors}
+        # Report node errors (if any)
+        @nodes.each {|node| node.report_errors}
 
         sleep 20
 
