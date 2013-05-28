@@ -4,9 +4,15 @@
 lib = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'pp'
-require 'time'
+require 'yaml'
 require 'avalon'
+
+env = ARGV[0] || 'prod'
+
+config_file = File.expand_path('../../config/config.yml', __FILE__)
+raise "No config file: #{config_file}" unless File.exist? config_file
+
+config = YAML::load_file(config_file)[env]
 
 last = (ARGV[0] || 182).to_i
 

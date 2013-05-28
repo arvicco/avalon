@@ -1,3 +1,6 @@
+require 'pp'
+require 'time'
+
 require "avalon/version"
 require "avalon/node"
 require "avalon/miner"
