@@ -5,7 +5,7 @@ module Avalon
 
     def poll verbose=true
       self[:google] = ping 'www.google.com'
-      self[:yahoo] = ping 'www.yahoo.com'
+      self[:speedtest] = ping 'www.speedtest.net'
       puts "#{self}" if verbose
     end
 

@@ -23,7 +23,7 @@ module Avalon
       elsif self[:found] > @found
         @found = self[:found]
         puts `ssh #{@ip} "cat solo/logs/pool.log | grep accepted"`
-        alarm "Eloipool found #{@found} blocks", "Purr.aiff", 3
+        alarm "Eloipool found #{@found} blocks", "Dog.aiff", "Purr.aiff", "Dog.aiff"
       end
     end
 

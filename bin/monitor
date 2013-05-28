@@ -8,12 +8,11 @@ require 'pp'
 require 'time'
 require 'avalon'
 
-### Script begins
-
 last = (ARGV[0] || 182).to_i
 
-nodes = (151..last).map {|i| Avalon::Miner.new(i)}
+nodes = (151..last).map {|i| Avalon::Miner.new("10.0.1.#{i}" )}
 
-nodes.push Avalon::Eloipool.new('10.0.1.13'), Avalon::Internet.new
+nodes.push Avalon::Eloipool.new("10.0.1.13"), Avalon::Internet.new
 
-Avalon::Monitor.new(nodes).run
+### Monitor the nodes with 30-seconds interval
+Avalon::Monitor.new(nodes, 30).run

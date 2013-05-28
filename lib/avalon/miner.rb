@@ -10,7 +10,7 @@ module Avalon
   class Miner < Node
 
     # Field formats: name => [width, pattern, type/conversion]
-    FIELDS = { :ping => [6, /./, nil],  # not a field in status...
+    FIELDS = { :ping => [8, /./, nil],  # not in miner status string...
                :mhs => [10, /MHS av=([\d\.]*)/, :f],
                :uptime => [6, /Elapsed=([\d\.]*)/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
                :utility => [7, /,Utility=([\d\.]*)/, :f],
@@ -28,8 +28,9 @@ module Avalon
       puts "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
-    def initialize num
-      @num = num
+    def initialize ip
+      @ip = ip
+      @num = ip.split('.').last.to_i
       super()
     end
 
@@ -54,9 +55,9 @@ module Avalon
     end
 
     def poll verbose=true
-      self[:ping] = ping "10.0.1.#{@num}"
+      self[:ping] = ping @ip
 
-      status = self[:ping] ? `bash -ic "echo -n 'summary' | nc 10.0.1.#{@num} 4028"` : ""
+      status = self[:ping] ? `bash -ic "echo -n 'summary' | nc #{@ip} 4028"` : ""
 
       extract_data_from status
 

@@ -3,8 +3,9 @@ module Avalon
   class Monitor
 
     # List of nodes to monitor
-    def initialize nodes, verbose=true
+    def initialize nodes, timeout, verbose=true
       @nodes = nodes
+      @timeout = timeout
       @verbose = verbose
     end
 
@@ -19,7 +20,7 @@ module Avalon
         # Report node errors (if any)
         @nodes.each {|node| node.report}
 
-        sleep 20
+        sleep @timeout
 
       end
     end

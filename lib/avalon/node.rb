@@ -21,11 +21,12 @@ module Avalon
     end
 
     # Helper method: sound alarm with message
-    def alarm message, tune="Glass.aiff", n=1
+    def alarm message, *tunes
       puts message
 
-      tune = "/System/Library/Sounds/#{tune}" unless File.exist?(tune)
-      n.times { `afplay #{tune}` }
+      tunes.each do |tune|
+        File.exist?(tune) ? `afplay #{tune}` : `afplay /System/Library/Sounds/#{tune}`
+      end
     end
 
     # Helper method: ping the Node
