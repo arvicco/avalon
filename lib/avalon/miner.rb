@@ -6,7 +6,7 @@ module Avalon
   #  Work Utility=992.58,Difficulty Accepted=944320.00000000,Difficulty Rejected=10368.00000000,
   #  Difficulty Stale=0.00000000,Best Share=7493180|\u0000"
 
-  class Stat
+  class Miner
 
     attr_accessor :data
 
@@ -23,8 +23,9 @@ module Avalon
                :found => [2, /Found Blocks=([\d\.]*)/, :i],
                }
 
-    def Stat.headers
-      "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
+    def self.print_headers
+      puts "\nMiner status as of #{Time.now.getlocal.asctime}:\n#{}"
+      puts "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
     def [] key
@@ -32,7 +33,11 @@ module Avalon
     end
 
     # Extract stats from status string
-    def initialize(status)
+    def initialize num
+      @num = num
+    end
+
+    def update_data status
       if status.empty? #
         @data = {}
       else
@@ -52,13 +57,42 @@ module Avalon
       end
     end
 
+    def check_status verbose=true
+      ping = `ping -c 1 10.0.1.#{@num}`
+
+      status = ping =~ /100.0% packet loss/ ? "" : `bash -ic "echo -n 'summary' | nc 10.0.1.#{@num} 4028"`
+
+      update_data status
+
+      puts "#{self}" if verbose
+    end
+
+    # Sound alarm with message
+    def alarm message, tune="Glass.aiff", n=1
+      puts message
+
+      tune = "/System/Library/Sounds/#{tune}" unless File.exist?(tune)
+      n.times { `afplay #{tune}` }
+    end
+
+    # Check for any exceptional situations in stats, sound alarm if any
+    def report_errors
+      if data.empty?
+        alarm "Miner #{@num} did not respond to status query"
+      elsif self[:mhs] < 60000 and self[:uptime] > 0.1
+        alarm "Miner #{@num} performance too low: #{self[:mhs]}"
+      elsif self[:uptime] < 0.05
+        alarm "Miner #{@num} restarted", "Frog.aiff"
+      end
+    end
+
     def to_s
-      @data.map {|name, value| value.to_s.ljust(FIELDS[name][0])}.join(" ")
+      "#{@num}: " + @data.map {|name, value| value.to_s.ljust(FIELDS[name][0])}.join(" ")
     end
 
     def inspect
       @data.map {|name, value| "#{name}:#{value}"}.join(" ")
     end
-  end
 
+  end
 end

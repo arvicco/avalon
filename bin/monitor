@@ -12,4 +12,6 @@ require 'avalon'
 
 last = (ARGV[0] || 182).to_i
 
-Avalon::Monitor.new(151..last).run
+miners = (151..last).map {|i| Avalon::Miner.new(i)}
+
+Avalon::Monitor.new(miners).run
