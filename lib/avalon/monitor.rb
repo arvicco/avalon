@@ -14,10 +14,10 @@ module Avalon
         Avalon::Miner.print_headers if @verbose
 
         # Check status for all nodes
-        @nodes.each {|node| node.check_status(@verbose)}
+        @nodes.each {|node| node.poll(@verbose)}
 
         # Report node errors (if any)
-        @nodes.each {|node| node.report_errors}
+        @nodes.each {|node| node.report}
 
         sleep 20
 

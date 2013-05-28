@@ -27,13 +27,13 @@ module Avalon
       puts "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
-    # Extract stats from status string
     def initialize num
       @num = num
       super()
     end
 
-    def update_data status
+    # Extract data from status string
+    def extract_data_from status
       if status.empty? #
         @data.clear
       else
@@ -53,18 +53,18 @@ module Avalon
       end
     end
 
-    def check_status verbose=true
+    def poll verbose=true
       ping = `ping -c 1 10.0.1.#{@num}`
 
       status = ping =~ /100.0% packet loss/ ? "" : `bash -ic "echo -n 'summary' | nc 10.0.1.#{@num} 4028"`
 
-      update_data status
+      extract_data_from status
 
       puts "#{self}" if verbose
     end
 
     # Check for any exceptional situations in stats, sound alarm if any
-    def report_errors
+    def report
       if data.empty?
         alarm "Miner #{@num} did not respond to status query"
       elsif self[:mhs] < 60000 and self[:uptime] > 0.1

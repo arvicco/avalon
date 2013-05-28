@@ -1,7 +1,7 @@
 module Avalon
 
   # Node is a single object to be monitored
-  # It should implement simple interface
+  # It should implement simple interface, only 2 required methods: #poll and #report
   class Node
 
     attr_accessor :data
@@ -9,7 +9,6 @@ module Avalon
     def initialize
       @data = {}
     end
-
 
     # Get a specific data point about this Node
     def [] key
@@ -29,14 +28,15 @@ module Avalon
       n.times { `afplay #{tune}` }
     end
 
-    # Check node status
-    def check_status verbose
-      raise "#{self.class} should implement #check_status"
+    # Abstract: Check node status
+    # If verbose, the Node should print out its state after the status update
+    def poll verbose
+      raise "#{self.class} should implement #poll"
     end
 
-    # Report node errors (if any)
-    def report_errors
-      raise "#{self.class} should implement #report_errors"
+    # Abstract: Report node errors or special situations (if any)
+    def report
+      raise "#{self.class} should implement #report"
     end
 
   end
