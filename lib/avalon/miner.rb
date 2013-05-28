@@ -10,7 +10,8 @@ module Avalon
   class Miner < Node
 
     # Field formats: name => [width, pattern, type/conversion]
-    FIELDS = { :mhs => [10, /MHS av=([\d\.]*)/, :f],
+    FIELDS = { :ping => [6, /./, nil],  # not a field in status...
+               :mhs => [10, /MHS av=([\d\.]*)/, :f],
                :uptime => [6, /Elapsed=([\d\.]*)/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
                :utility => [7, /,Utility=([\d\.]*)/, :f],
                :getworks => [8, /Getworks=([\d\.]*)/, :i],
@@ -39,24 +40,23 @@ module Avalon
       else
         # Convert the status string into usable data pairs
         pairs = FIELDS.map do |name, (_, pattern, type)|
-          data_str = status.match(pattern)[1]
-          data = if type.is_a?(Symbol)
-            data_str.send("to_#{type}")
+          value_str = status.match(pattern)[1]
+          if type.is_a?(Symbol)
+            [name, value_str.send("to_#{type}")]
           elsif type.respond_to?(:call)
-            type.call(data_str)
+            [name, type.call(value_str)]
           else
             nil
           end
-          [name, data]
         end
-        @data = Hash[*pairs.flatten]
+        @data.merge! Hash[*pairs.compact.flatten]
       end
     end
 
     def poll verbose=true
-      ping = `ping -c 1 10.0.1.#{@num}`
+      self[:ping] = ping "10.0.1.#{@num}"
 
-      status = ping =~ /100.0% packet loss/ ? "" : `bash -ic "echo -n 'summary' | nc 10.0.1.#{@num} 4028"`
+      status = self[:ping] ? `bash -ic "echo -n 'summary' | nc 10.0.1.#{@num} 4028"` : ""
 
       extract_data_from status
 

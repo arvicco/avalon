@@ -9,7 +9,7 @@ module Avalon
     end
 
     def poll verbose=true
-      self[:ping] = `ping -c 1 #{@ip}` =~ / 0.0% packet loss/
+      self[:ping] = ping @ip
 
       self[:found] = `ssh #{@ip} "cat solo/logs/pool.log | grep accepted | wc -l"`.to_i
 
@@ -28,7 +28,7 @@ module Avalon
     end
 
     def to_s
-      "Eloipool #{@ip}: " + @data.map {|name, value| "#{name}:#{value}"}.join(" ")
+      "Eloipool: " + @data.map {|name, value| "#{name}:#{value}"}.join(" ")
     end
 
     def inspect

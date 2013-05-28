@@ -4,14 +4,21 @@ module Avalon
   class Internet < Node
 
     def poll verbose=true
-      self[:google_ping] = `ping -c 1 www.google.com` =~ / 0.0% packet loss/
+      self[:google] = ping 'www.google.com'
+      self[:yahoo] = ping 'www.yahoo.com'
+      puts "#{self}" if verbose
     end
 
     # Check for any exceptional situations with Node, sound alarm if any
     def report
-      unless self[:google_ping]
-        alarm "Google ping failed, check your Internet connection"
+      @data.each do |target, ping|
+        alarm "Ping #{target} failed, check your Internet connection" unless ping
       end
     end
+
+    def to_s
+      "Internet: " + @data.map {|name, value| "#{name}:#{value}"}.join(" ")
+    end
+
   end
 end

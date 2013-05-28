@@ -20,12 +20,20 @@ module Avalon
       @data[key] = value
     end
 
-    # Sound alarm with message
+    # Helper method: sound alarm with message
     def alarm message, tune="Glass.aiff", n=1
       puts message
 
       tune = "/System/Library/Sounds/#{tune}" unless File.exist?(tune)
       n.times { `afplay #{tune}` }
+    end
+
+    # Helper method: ping the Node
+    def ping ip
+      ping_result = `ping -c 1 #{ip}`
+      if ping_result =~ / 0.0% packet loss/
+        ping_result.match(/time=([\.\d]*) ms/)[1].to_f
+      end
     end
 
     # Abstract: Check node status
