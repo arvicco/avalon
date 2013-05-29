@@ -3,9 +3,13 @@ module Avalon
   # Internet is a node encapsulating information about Internet connectivity
   class Internet < Node
 
+    def initialize *sites
+      @sites = Hash[ *sites.map {|site| [site.split(/\./)[-2].to_sym, site]}.flatten ]
+      super()
+    end
+
     def poll verbose=true
-      self[:google] = ping 'www.google.com'
-      self[:speedtest] = ping 'www.speedtest.net'
+      @sites.each {|name, site| self[name] = ping site }
       puts "#{self}" if verbose
     end
 

@@ -4,6 +4,12 @@ module Avalon
   # It should implement simple interface, only 2 required methods: #poll and #report
   class Node
 
+    # Builder method for creating Node subclasses from config arrays
+    def Node.create *args
+      subclass = Avalon.const_get(args.first.capitalize)
+      subclass.new *args.drop(1)
+    end
+
     attr_accessor :data
 
     def initialize
@@ -23,6 +29,8 @@ module Avalon
     # Helper method: sound alarm with message
     def alarm message, *tunes
       puts message
+
+      tunes.push('Glass.aiff') if tunes.empty?
 
       tunes.each do |tune|
         File.exist?(tune) ? `afplay #{tune}` : `afplay /System/Library/Sounds/#{tune}`

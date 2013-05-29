@@ -9,16 +9,10 @@ require 'avalon'
 
 env = ARGV[0] || 'prod'
 
-config_file = File.expand_path('../../config/config.yml', __FILE__)
+config_file = File.expand_path('../../config/monitor.yml', __FILE__)
 raise "No config file: #{config_file}" unless File.exist? config_file
 
 config = YAML::load_file(config_file)[env]
 
-last = (ARGV[0] || 182).to_i
-
-nodes = (151..last).map {|i| Avalon::Miner.new("10.0.1.#{i}" )}
-
-nodes.push Avalon::Eloipool.new("10.0.1.13"), Avalon::Internet.new
-
 ### Monitor the nodes with 30-seconds interval
-Avalon::Monitor.new(nodes, 30).run
+Avalon::Monitor.new(config[:monitor]).run

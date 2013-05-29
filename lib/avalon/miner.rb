@@ -28,9 +28,10 @@ module Avalon
       puts "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
-    def initialize ip
+    def initialize ip, min_speed
       @ip = ip
       @num = ip.split('.').last.to_i
+      @min_speed = min_speed * 1000 # Gh/s to Mh/s
       super()
     end
 
@@ -68,8 +69,8 @@ module Avalon
     def report
       if data.empty?
         alarm "Miner #{@num} did not respond to status query"
-      elsif self[:mhs] < 60000 and self[:uptime] > 0.1
-        alarm "Miner #{@num} performance too low: #{self[:mhs]}"
+      elsif self[:mhs] < @min_speed and self[:uptime] > 0.1
+        alarm "Miner #{@num} performance is #{self[:mhs]}, should be #{@min_speed}"
       elsif self[:uptime] < 0.05
         alarm "Miner #{@num} restarted", "Frog.aiff"
       end

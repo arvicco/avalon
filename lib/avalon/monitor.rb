@@ -3,10 +3,10 @@ module Avalon
   class Monitor
 
     # List of nodes to monitor
-    def initialize nodes, timeout, verbose=true
-      @nodes = nodes
-      @timeout = timeout
-      @verbose = verbose
+    def initialize opts
+      @nodes = opts[:nodes].map {|args| Avalon::Node.create(*args)}
+      @timeout = opts[:timeout] || 30
+      @verbose = opts[:verbose]
     end
 
     def run
