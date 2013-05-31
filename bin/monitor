@@ -9,10 +9,7 @@ require 'avalon'
 
 env = ARGV[0] || 'prod'
 
-config_file = File.expand_path('../../config/monitor.yml', __FILE__)
-raise "No config file: #{config_file}" unless File.exist? config_file
-
-config = YAML::load_file(config_file)[env]
+Avalon::Config.load env
 
 ### Monitor the nodes with 30-seconds interval
-Avalon::Monitor.new(config[:monitor]).run
+Avalon::Monitor.new(Avalon::Config[:monitor]).run
