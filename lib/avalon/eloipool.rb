@@ -25,6 +25,13 @@ module Avalon
         @found = self[:found]
         add_new_blocks `ssh #{@ip} "cat solo/logs/pool.log | grep BLKHASH"`
         alarm "Eloipool found #{@found} blocks", "Dog.aiff", "Purr.aiff", "Dog.aiff"
+      elsif @pending_hash && @blocks[@pending_hash].pending?
+        if @blocks[@pending_hash].blockchain_update
+          Block.print_headers
+          puts @blocks[@pending_hash]
+          alarm "Eloipool last block updated", "Purr.aiff", "Purr.aiff", "Purr.aiff"
+          @pending_hash = nil
+        end
       end
     end
 
@@ -34,8 +41,9 @@ module Avalon
       pool_log.split(/\n/).drop(17).each do |line|
         hash = line.chomp.match(/\h*$/).to_s
         unless @blocks[hash]
-          @blocks[hash] = Block.new(hash, @ip)
+          @blocks[hash] = Block.new(hash)
           puts @blocks[hash]
+          @pending_hash = hash
         end
       end
     end
