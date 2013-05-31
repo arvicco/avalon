@@ -15,7 +15,7 @@ module Avalon
       :reward => [6, "fee", ->(x){ (25 + x/100_000_000.0).round(3)}],
       :txns => [4, "n_tx", :i],
       :size => [3, "size", ->(x){ x/1024 }],
-      :relayed_by => [13, "relayed_by", :s],
+      :relayed_by => [14, "relayed_by", :s],
       :chain => [5, "main_chain", ->(x){ x ? 'main' : 'orphan' }],
       :conf => [4, "confirmations", :i],
       :hash => [56, "hash", ->(x){ x.sub(/^0*/,'')}],
@@ -40,7 +40,7 @@ module Avalon
       #    "confirmations" : 0,
       #    "difficulty" : 12153411.70977583}
       bitcoind_info = Bitcoind.getblock @data[:hash], "| grep -v -E '^        .*,'"
-      @data.merge! self.class.extract_data_from( bitcoind_info )
+      @data.merge! self.class.extract_data_from( bitcoind_info ) if bitcoind_info
     end
 
     def blockchain_update
@@ -61,8 +61,7 @@ module Avalon
       #  "received_time"=>1369850888,
       #  "relayed_by"=>"37.251.86.21"}
       blockchain_info = Blockchain.rawblock @data[:hash].rjust(64, '0')
-      @data.merge! self.class.extract_data_from( blockchain_info )
-      blockchain_info.nil?
+      @data.merge! self.class.extract_data_from( blockchain_info ) if blockchain_info
     end
 
     def pending?

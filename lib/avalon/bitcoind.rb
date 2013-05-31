@@ -10,8 +10,8 @@ module Avalon
 
       def method_missing *args
         rpc = "bitcoind -rpcuser=#{config[:rpcuser]} -rpcpassword=#{config[:rpcpassword]}"
-        cmd = args.join(' ')
-        JSON.parse(`ssh #{config[:ip]} "#{rpc} #{cmd}"`)
+        result = `ssh #{config[:ip]} "#{rpc} #{args.join(' ')}"`
+        JSON.parse(result) unless result.empty?
       end
 
       def config
