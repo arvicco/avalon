@@ -3,55 +3,27 @@ module Avalon
   # Block contains details about block found by the pool
   class Block
 
+    extend Extractable
+
     attr_accessor :data
 
-    def self.my_time timestamp, date=false
-      time = Time.at(timestamp.to_f).getlocal
-      date ? time.strftime("%Y-%m-%d %H:%M:%S") : time.strftime("%H:%M:%S")
-    end
-
     # Field formats: name => [width, original name, type/conversion]
-    FIELDS = { :height => [6, "height", :i],  # not in miner status string...
-               :time => [19, "time", ->(t){ my_time(t, true)}],
-               :received => [8, "received_time", ->(t){ my_time(t)}],
-               :reward => [6, "fee", ->(x){ (25 + x/100_000_000.0).round(3)}],
-               :txns => [4, "n_tx", :i],
-               :size => [3, "size", ->(x){ x/1024 }],
-               :relayed_by => [13, "relayed_by", :s],
-               :chain => [5, "main_chain", ->(x){ x ? 'main' : 'orphan' }],
-               :conf => [4, "confirmations", :i],
-               :hash => [56, "hash", ->(x){ x.sub(/^0*/,'')}],
-               }
+    FIELDS = {
+      :height => [6, "height", :i],  # not in miner status string...
+      :time => [19, "time", ->(t){ my_time(t, :absolute_date)}],
+      :received => [8, "received_time", ->(t){ my_time(t)}],
+      :reward => [6, "fee", ->(x){ (25 + x/100_000_000.0).round(3)}],
+      :txns => [4, "n_tx", :i],
+      :size => [3, "size", ->(x){ x/1024 }],
+      :relayed_by => [13, "relayed_by", :s],
+      :chain => [5, "main_chain", ->(x){ x ? 'main' : 'orphan' }],
+      :conf => [4, "confirmations", :i],
+      :hash => [56, "hash", ->(x){ x.sub(/^0*/,'')}],
+    }
 
     def self.print_headers
       puts FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
-
-    # Extract data from String OR Hash
-    def extract_data_from input
-      if input.nil? || input.empty?
-        {}
-      else
-        # Convert the input into usable data pairs
-        pairs = FIELDS.map do |name, (_, pattern, type)|
-          val = input[pattern] # works for both pattern and key
-          unless val.nil?
-            case type
-            when Symbol
-              [name, val.send("to_#{type}")]
-            when Proc
-              [name, type.call(val)]
-            when '' # no conversion
-              [name, val]
-            else
-              nil
-            end
-          end
-        end
-        Hash[*pairs.compact.flatten]
-      end
-    end
-
 
     def initialize hash, ip
       # {"hash" : "0000000000000029714fcc1f7bcd43cd13286b665f759eb018cfc539841623a4",
@@ -69,7 +41,7 @@ module Avalon
       bitcoind_info = Bitcoind.getblock hash, "| grep -v -E '^        .*,'"
       bitcoind_info.delete('tx')
       # pp bitcoind_info
-      @data = extract_data_from( bitcoind_info )
+      @data = self.class.extract_data_from( bitcoind_info )
 
       #{"hash"=>"00000000000000783be7e82df4d8a71bf1fd8073d2bbd60f2b8638e4d042d32c",
       #  "ver"=>2,
@@ -87,18 +59,11 @@ module Avalon
       #  "received_time"=>1369850888,
       #  "relayed_by"=>"37.251.86.21"}
       blockchain_info = Blockchain.rawblock hash.rjust(64, '0')
-      @data.merge! extract_data_from( blockchain_info )
-    end
-
-    def to_s
-      "Block #{@data[:height]}: #{@data[:time]}/#{@data[:received_time]} " +
-        "reward:#{@data[:reward]} txns:#{@data[:n_tx]} size:#{@data[:size]/1024}K " +
-      "#{@data[:relayed_by]} #{@data[:main_chain] ? 'main' : 'orphan!'}"
+      @data.merge! self.class.extract_data_from( blockchain_info )
     end
 
     def to_s
       FIELDS.map {|key, (width, _, _ )| @data[key].to_s.ljust(width)}.join(" ")
-      # @data.map {|name, value| value.to_s.ljust(FIELDS[name][0])}.join(" ")
     end
 
   end

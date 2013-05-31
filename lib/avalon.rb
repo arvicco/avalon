@@ -5,6 +5,7 @@ require "avalon/version"
 require "avalon/blockchain"
 require "avalon/bitcoind"
 require "avalon/config"
+require "avalon/extractable"
 
 require "avalon/block"
 require "avalon/node"

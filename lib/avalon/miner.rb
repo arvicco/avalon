@@ -9,41 +9,30 @@ module Avalon
   # Miner is a node encapsulating a single Avalon unit
   class Miner < Node
 
-    # type = :absolute_time | :absolute_date | :relative_time
-    def self.my_time t, type=:absolute_time
-      time = Time.at(t.to_f)
-      case type
-      when :absolute_date
-        time.getlocal.strftime("%Y-%m-%d %H:%M:%S")
-      when :absolute_time
-        time.getlocal.strftime("%H:%M:%S")
-      when :relative_time
-        time.utc.strftime("#{(time.day-1)*24+time.hour}:%M:%S")
-      end
-    end
-
+    extend Extractable
 
     # Field formats: name => [width, pattern, type/conversion]
-    FIELDS = { :ping => [8, /./, nil],  # not in miner status string...
-               :mhs => [6, /(?<=MHS av=)[\d\.]*/, :i],
-               # :uptime => [6, /(?<=Elapsed=)[\d\.]*/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
-               :uptime => [8, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
-               :last => [8, /(?<=Last Share Time=)[\d\.]*/,
-                         ->(x){ my_time(Time.now.getgm-x.to_i, :relative_time)}],
-                         # ->(x){ my_time(Time.now-Time.at(x.to_i), :relative_time)}],
-               :utility => [7, /(?<=,Utility=)[\d\.]*/, :f],
-               :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
-               :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
-               :rejected => [8, /(?<=Rejected=)[\d\.]*/, :i],
-               :stale => [6, /(?<=Stale=)[\d\.]*/, :i],
-               :errors => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
-               :blocks => [6, /(?<=Network Blocks=)[\d\.]*/, :i],
-               :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
-               }
+    FIELDS = {
+      :ping => [8, /./, nil],  # not in miner status string...
+      :mhs => [6, /(?<=MHS av=)[\d\.]*/, :i],
+      # :uptime => [6, /(?<=Elapsed=)[\d\.]*/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
+      :uptime => [8, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
+      :last => [8, /(?<=Last Share Time=)[\d\.]*/,
+                ->(x){ my_time(Time.now.getgm-x.to_i, :relative_time)}],
+      # ->(x){ my_time(Time.now-Time.at(x.to_i), :relative_time)}],
+      :utility => [7, /(?<=,Utility=)[\d\.]*/, :f],
+      :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
+      :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
+      :rejected => [8, /(?<=Rejected=)[\d\.]*/, :i],
+      :stale => [6, /(?<=Stale=)[\d\.]*/, :i],
+      :errors => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
+      :blocks => [6, /(?<=Network Blocks=)[\d\.]*/, :i],
+      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
+    }
 
     def self.print_headers
-      puts "\nMiner status as of #{Time.now.getlocal.asctime}:\n#{}"
-      puts "#    " + FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
+      puts "\nMiner status as of #{Time.now.getlocal.asctime}:\n#    " +
+        FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
     def initialize ip, min_speed
@@ -74,16 +63,16 @@ module Avalon
       end
     end
 
-    def get api_call
-      self[:ping] ? `bash -ic "echo -n '#{api_call}' | nc #{@ip} 4028"` : ""
+    def get_api call
+      self[:ping] ? `bash -ic "echo -n '#{call}' | nc #{@ip} 4028"` : ""
     end
 
     def poll verbose=true
       self[:ping] = ping @ip
 
-      status = get('summary') + get('pools')
+      status = get_api('summary') + get_api('pools')
 
-      extract_data_from status
+      @data.merge! self.class.extract_data_from(status)
 
       puts "#{self}" if verbose
     end
@@ -108,11 +97,7 @@ module Avalon
     end
 
     def to_s
-      "#{@num}: " + @data.map {|name, value| value.to_s.ljust(FIELDS[name][0])}.join(" ")
-    end
-
-    def inspect
-      @data.map {|name, value| "#{name}:#{value}"}.join(" ")
+      "#{@num}: " + FIELDS.map {|key, (width, _, _ )| @data[key].to_s.ljust(width)}.join(" ")
     end
 
   end
