@@ -4,7 +4,8 @@ module Avalon
 
     def initialize ip, frequency
       @ip = ip
-      @frequency = frequency
+      @update_frequency = frequency
+      @update_num = 0
       @block_file = File.expand_path('../../../config/blocks.yml', __FILE__)
       @blocks = load_blocks || {}
       super()
@@ -15,7 +16,7 @@ module Avalon
 
       self[:found] = `ssh #{@ip} "cat solo/logs/pool.log | grep BLKHASH | wc -l"`.to_i
 
-      random_block_update @frequency
+      update_old_block
 
       puts "#{self}" if verbose
     end
@@ -53,11 +54,16 @@ module Avalon
       end
     end
 
-    def random_block_update frequency = 2 # one in 2 polls
-      random_number = rand(@blocks.keys.size*@frequency)
-      random_hash = @blocks.keys[random_number]
-      random_block = @blocks[random_hash]
-      update_block(random_block, true) if random_block
+    def update_old_block
+      if rand(@update_frequency) == 0 # update once per @frequency polls
+        hash = @blocks.keys[@update_num]
+        if @blocks[hash]
+          @update_num += 1
+          update_block(@blocks[hash], true)
+        else
+          @update_num = 0
+        end
+      end
     end
 
     def update_block block, print = true
