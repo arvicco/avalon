@@ -43,26 +43,6 @@ module Avalon
       super()
     end
 
-    # Extract data from status string
-    def extract_data_from status
-      if status.empty? #
-        @data.clear
-      else
-        # Convert the status string into usable data pairs
-        pairs = FIELDS.map do |name, (_, pattern, type)|
-          value_str = status[pattern] #[1]
-          if type.is_a?(Symbol)
-            [name, value_str.send("to_#{type}")]
-          elsif type.respond_to?(:call)
-            [name, type.call(value_str)]
-          else
-            nil
-          end
-        end
-        @data.merge! Hash[*pairs.compact.flatten]
-      end
-    end
-
     def get_api call
       self[:ping] ? `bash -ic "echo -n '#{call}' | nc #{@ip} 4028"` : ""
     end
@@ -71,19 +51,25 @@ module Avalon
       self[:ping] = ping @ip
 
       status = get_api('summary') + get_api('pools')
+      data = self.class.extract_data_from(status)
 
-      @data.merge! self.class.extract_data_from(status)
+      if data.empty?
+        @data = {}
+      else
+        @data.merge! data
+      end
 
       puts "#{self}" if verbose
     end
 
     def upminutes
-      Time.utc(1970, 01, 01, *self[:uptime].split(/:/).map(&:to_i)).to_i/60.0
+      hour, min, _ = *self[:uptime].split(/:/).map(&:to_i)
+      hour*60 + min
     end
 
     # Check for any exceptional situations in stats, sound alarm if any
     def report
-      if data.empty?
+      if data[:ping].nil?
         @blanks += 1
         alarm "Miner #{@num} did not respond to status query" if @blanks > 1
       else
