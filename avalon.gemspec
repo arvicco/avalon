@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'avalon/version'
 
 Gem::Specification.new do |gem|
-  gem.name          = "avalon"
+  gem.name          = "arvicco-avalon"
   gem.version       = Avalon::VERSION
   gem.authors       = ["arvicco"]
   gem.email         = ["arvicco@gmail.com"]
