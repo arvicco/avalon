@@ -71,7 +71,7 @@ module Avalon
     def report
       if data[:ping].nil?
         @blanks += 1
-        alarm "Miner #{@num} did not respond to status query" if @blanks > 1
+        alarm "Miner #{@num} did not respond to status query" if @blanks > 2
       else
         @blanks = 0
         if self[:mhs] < @min_speed*0.95 and upminutes > 5
