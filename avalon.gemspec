@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["arvicco@gmail.com"]
   gem.description   = %q{Avalon miners monitor}
   gem.summary       = %q{Avalon miners monitor and set of helper scripts}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/arvicco/avalon"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
