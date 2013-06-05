@@ -18,21 +18,21 @@ $ mtgox_tx
 
 Sample monitor config file for production environment below. Modify it, add your own nodes to be monitored.
 
-------- config/monitor.yml --------
-# Prod configuration
-prod:
-  :bitcoind:
-    :ip: 192.168.1.13
-    :rpcuser: jbond
-    :rpcpassword: youcannotguessitdonteventry
-  :monitor:
-    :verbose: true
-    :timeout: 30
-    :nodes:
-      - [miner, 192.168.1.151, 70] # type, ip, gh/s
-      - [miner, 192.168.1.152, 70]
-      - [eloipool, 192.168.1.13, 4] # frequency of old block updates (once per X polls)
-      - [internet, www.google.com, www.speedtest.net]
+    ------- config/monitor.yml --------
+    # Prod configuration
+    prod:
+      :bitcoind:
+        :ip: 192.168.1.13
+        :rpcuser: jbond
+        :rpcpassword: youcannotguessitdonteventry
+      :monitor:
+        :verbose: true
+        :timeout: 30
+        :nodes:
+          - [miner, 192.168.1.151, 70] # type, ip, gh/s
+          - [miner, 192.168.1.152, 70]
+          - [eloipool, 192.168.1.13, 4] # frequency of old block updates (once per X polls)
+          - [internet, www.google.com, www.speedtest.net]
 
 ## License
 
