@@ -39,7 +39,7 @@ module Avalon
       @ip = ip
       @num = ip.split('.').last.to_i
       @min_speed = min_speed * 1000 # Gh/s to Mh/s
-      @blanks = 0
+      @fails = 0
       super()
     end
 
@@ -70,10 +70,12 @@ module Avalon
     # Check for any exceptional situations in stats, sound alarm if any
     def report
       if data[:ping].nil?
-        @blanks += 1
-        alarm "Miner #{@num} did not respond to status query" if @blanks > 2
+        @fails += 1
+        if @fails >= Avalon::Config[:status_fails_to_alarm] || 1
+          alarm "Miner #{@num} did not respond to status query"
+        end
       else
-        @blanks = 0
+        @fails = 0
         if self[:mhs] < @min_speed*0.95 and upminutes > 5
           alarm "Miner #{@num} performance is #{self[:mhs]}, should be #{@min_speed}"
         elsif upminutes < 2
