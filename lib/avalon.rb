@@ -2,6 +2,7 @@ require 'pp'
 require 'time'
 
 require "avalon/version"
+require "avalon/utils"
 require "avalon/blockchain"
 require "avalon/bitcoind"
 require "avalon/config"
