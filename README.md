@@ -6,9 +6,9 @@ Helper scripts for Bitcoin and Avalon miners management...
 
 Scripts:
 
-$ bin/monitor [last_ip]
+$ bin/monitor [environment]
 
-- Monitors all miners from 151 to last_ip (default 182)
+- Monitors all the nodes (miners, pools, Internet connections) that are listed in config/monitor.yml file. Sounds alarm is anything is wrong with the monitored nodes. TODO: takes action to correct errors found (like restarting the miners etc).
 
 $ mtgox_tx
 
@@ -16,10 +16,10 @@ $ mtgox_tx
 
 ## Configuration
 
-Sample monitor config file for production environment below. Modify it, add your own nodes to be monitored.
+Sample monitor config file for production environment below. Modify it, add your own nodes to be monitored (for Avalon miners, you have to set their IP address and min hashrate in Gh/s):
 
     ------- config/monitor.yml --------
-    # Prod configuration
+    # Prod configuration (default)
     prod:
       :bitcoind:
         :ip: 192.168.1.13
