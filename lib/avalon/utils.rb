@@ -10,7 +10,7 @@ module Avalon
       file = [ tune,
                File.expand_path("../../../sound/#{tune}", __FILE__),
                File.expand_path("~/sound/#{tune}", __FILE__),
-               File.expand_path("/System/Library/Sounds/#{tune}")
+               File.expand_path("/System/Library/Sounds/#{tune}"),
                ].find {|f| File.exist?(f)}
 
       case system
@@ -18,7 +18,7 @@ module Avalon
         `afplay #{file}`
       when 'Linux'
         raise 'Please install sox package: sudo apt-get install sox' if `which sox`.empty?
-        `play #{file}`
+        `play -q #{file}`
       end
     end
 
@@ -34,7 +34,7 @@ module Avalon
     # Helper method: ping the Node, return ping time in ms
     def ping ip
       ping_result = `ping -c 1 #{ip}`
-      if ping_result =~ / 0.0% packet loss/
+      if ping_result =~ /( | 0.)0% packet loss/
         ping_result.match(/time=([\.\d]*) ms/)[1].to_f
       end
     end
