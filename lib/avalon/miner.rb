@@ -72,7 +72,7 @@ module Avalon
     def report
       if data[:ping].nil?
         @fails += 1
-        if @fails >= @status_fails_to_alarm || 1
+        if @fails >= @status_fails_to_alarm
           alarm "Miner #{@num} did not respond to status query"
         end
       else
