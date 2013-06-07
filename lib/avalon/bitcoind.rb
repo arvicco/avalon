@@ -15,7 +15,7 @@ module Avalon
       end
 
       def config
-        Avalon::Config[:bitcoind]
+        Avalon::Config[:bitcoind] || {}
       end
     end
   end

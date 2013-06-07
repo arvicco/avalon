@@ -40,7 +40,7 @@ module Avalon
       @num = ip.split('.').last.to_i
       @min_speed = min_speed * 1000 # Gh/s to Mh/s
       @fails = 0
-      @status_fails_to_alarm = Avalon::Config[:status_fails_to_alarm]
+      @status_fails_to_alarm = Avalon::Config[:status_fails_to_alarm] || 2
       super()
     end
 
