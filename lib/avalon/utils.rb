@@ -5,13 +5,14 @@ module Avalon
       @system = `uname -a`.match(/^\w*/).to_s
     end
 
+    def find_file *locations
+      locations.map {|loc| File.expand_path(loc,__FILE__)}.find {|f| File.exist?(f)}
+    end
+
     # Helper method: play a sound file
     def play tune
-      file = [ tune,
-               File.expand_path("../../../sound/#{tune}", __FILE__),
-               File.expand_path("~/sound/#{tune}", __FILE__),
-               File.expand_path("/System/Library/Sounds/#{tune}"),
-               ].find {|f| File.exist?(f)}
+      file = find_file( tune, "../../../sound/#{tune}",
+        "~/.avalon/sound/#{tune}", "/System/Library/Sounds/#{tune}")
 
       case system
       when 'Darwin'

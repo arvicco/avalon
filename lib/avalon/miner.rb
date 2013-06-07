@@ -40,6 +40,7 @@ module Avalon
       @num = ip.split('.').last.to_i
       @min_speed = min_speed * 1000 # Gh/s to Mh/s
       @fails = 0
+      @status_fails_to_alarm = Avalon::Config[:status_fails_to_alarm]
       super()
     end
 
@@ -71,7 +72,7 @@ module Avalon
     def report
       if data[:ping].nil?
         @fails += 1
-        if @fails >= Avalon::Config[:status_fails_to_alarm] || 1
+        if @fails >= @status_fails_to_alarm || 1
           alarm "Miner #{@num} did not respond to status query"
         end
       else

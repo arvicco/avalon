@@ -6,7 +6,7 @@ module Avalon
       @ip = ip
       @update_frequency = frequency
       @update_num = 0
-      @block_file = File.expand_path('../../../config/blocks.yml', __FILE__)
+      @block_file = Avalon::Config[:block_file]
       @blocks = load_blocks || {}
       super()
     end
