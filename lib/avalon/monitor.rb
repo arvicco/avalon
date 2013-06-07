@@ -20,7 +20,6 @@ module Avalon
         # Report node errors (if any)
         @nodes.each {|node| node.report}
 
-        @nodes.first.alarm 'Poll completed', 'Purr.aiff'
         sleep @timeout
 
       end
