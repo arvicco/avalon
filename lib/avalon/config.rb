@@ -10,8 +10,8 @@ module Avalon
 
       @config = YAML::load_file(config_file)[env]
       @config[:environment] = env
-      @config[:block_file] =  find_file( '../../../config/blocks.yml',
-                                         '~/.avalon/blocks.yml') || File.expand('~/.avalon/blocks.yml')
+      @config[:block_file] =  find_file( '../../../config/blocks.yml', '~/.avalon/blocks.yml') ||
+        File.expand_path('~/.avalon/blocks.yml')
 
     end
 
