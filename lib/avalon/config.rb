@@ -6,7 +6,7 @@ module Avalon
     def self.load env
       config_file = find_file( '../../../config/monitor.yml', '~/.avalon/monitor.yml')
 
-      raise "No config file: #{config_file}" unless File.exist? config_file
+      raise "No config file: ~/.avalon/monitor.yml" unless File.exist? config_file
 
       @config = YAML::load_file(config_file)[env]
       @config[:environment] = env

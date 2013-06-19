@@ -15,11 +15,10 @@ module Avalon
     FIELDS = {
       :ping => [8, /./, nil],  # not in miner status string...
       :mhs => [6, /(?<=MHS av=)[\d\.]*/, :i],
-      # :uptime => [6, /(?<=Elapsed=)[\d\.]*/, ->(x){ (x.to_i/60.0/60.0).round(2)}],
       :uptime => [8, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
       :last => [8, /(?<=Last Share Time=)[\d\.]*/,
                 ->(x){ my_time(Time.now.getgm-x.to_i, :relative_time)}],
-      # ->(x){ my_time(Time.now-Time.at(x.to_i), :relative_time)}],
+      :temp => [5, /(?<=Temperature=)[\d\.]*/, :f],
       :utility => [7, /(?<=,Utility=)[\d\.]*/, :f],
       :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
       :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
@@ -40,7 +39,8 @@ module Avalon
       @num = ip.split('.').last.to_i
       @min_speed = min_speed * 1000 # Gh/s to Mh/s
       @fails = 0
-      @status_fails_to_alarm = Avalon::Config[:status_fails_to_alarm] || 2
+      @alert_after = Avalon::Config[:alert_after] ||
+        Avalon::Config[:status_fails_to_alarm] || 2
       super()
     end
 
@@ -51,7 +51,12 @@ module Avalon
     def poll verbose=true
       self[:ping] = ping @ip
 
-      status = get_api('summary') + get_api('pools')
+      status = get_api('summary') + get_api('pools') + get_api('devs')
+      # pools = get_api('pools')
+      # devs = get_api('devs')
+      # p pools, pools[FIELDS[:last][1]]
+      # p devs
+
       data = self.class.extract_data_from(status)
 
       if data.empty?
@@ -72,7 +77,7 @@ module Avalon
     def report
       if data[:ping].nil?
         @fails += 1
-        if @fails >= @status_fails_to_alarm
+        if @fails >= @alert_after
           alarm "Miner #{@num} did not respond to status query"
         end
       else

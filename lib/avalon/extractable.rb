@@ -1,8 +1,6 @@
 module Avalon
 
   # Mix-in for extraction of properties from a given input String or Hash
-  # Depeds on #fields method hook in the host class to enumerate property fields,
-  # in the format: {:name => [width, pattern, type/conversion]}
   module Extractable
 
     # type = :absolute_time | :absolute_date | :relative_time
