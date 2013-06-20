@@ -15,7 +15,7 @@ module Avalon
     FIELDS = {
       :ping => [8, /./, nil],  # not in miner status string...
       :mhs => [6, /(?<=MHS av=)[\d\.]*/, :i],
-      :uptime => [8, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
+      :uptime => [9, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
       :last => [8, /(?<=Last Share Time=)[\d\.]*/,
                 ->(x){ my_time(Time.now.getgm-x.to_i, :relative_time)}],
       :temp => [5, /(?<=Temperature=)[\d\.]*/, :f],

@@ -33,7 +33,8 @@ Sample monitor config file for production environment below. Modify it, add your
     ------- ~/.avalon/monitor.yml --------
     # Prod configuration (default)
     prod:
-      :alert_after: 2  # missed pings or status reports from a miner
+      :alert_after: 2      # missed pings or status reports from a miner
+      :alert_sound: :aiff  # :none for silent alerts
       :bitcoind:
         :ip: 192.168.1.13
         :rpcuser: jbond

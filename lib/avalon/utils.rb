@@ -2,7 +2,7 @@ module Avalon
   module Utils
 
     def system
-      @system = `uname -a`.match(/^\w*/).to_s
+      @system ||= `uname -a`.match(/^\w*/).to_s
     end
 
     def find_file *locations
@@ -11,15 +11,16 @@ module Avalon
 
     # Helper method: play a sound file
     def play tune
-      file = find_file( tune, "../../../sound/#{tune}",
-        "~/.avalon/sound/#{tune}", "/System/Library/Sounds/#{tune}")
-
-      case system
-      when 'Darwin'
-        `afplay #{file}`
-      when 'Linux'
-        raise 'Please install sox package: sudo apt-get install sox' if `which sox`.empty?
-        `play -q #{file}`
+      unless Avalon::Config[:alert_sound] == :none
+        file = find_file( tune, "../../../sound/#{tune}",
+                          "~/.avalon/sound/#{tune}", "/System/Library/Sounds/#{tune}")
+        case system
+        when 'Darwin'
+          `afplay #{file}`
+        when 'Linux'
+          raise 'Please install sox package: sudo apt-get install sox' if `which sox`.empty?
+          `play -q #{file}`
+        end
       end
     end
 
