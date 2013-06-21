@@ -20,6 +20,11 @@ module Avalon
         # Report node errors (if any)
         @nodes.each {|node| node.report}
 
+        if @verbose
+          total_hash = @nodes.reduce(0) {|hash, node| hash + (node[:mhs] || 0)}
+          puts "Total hash rate: #{total_hash}"
+        end
+
         sleep @timeout
 
       end
