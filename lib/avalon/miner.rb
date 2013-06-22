@@ -16,8 +16,8 @@ module Avalon
       :ping => [8, /./, nil],  # not in miner status string...
       :mhs => [6, /(?<=MHS av=)[\d\.]*/, :i],
       :uptime => [9, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
-      :last => [8, /(?<=Last Share Time=)[\d\.]*/,
-                ->(x){ my_time(Time.now.getgm-x.to_i, :relative_time)}],
+      :last => [8, /(?<=Status=Alive,).*?Last Share Time=[\d\.]*/,
+                ->(x){ convert_last(x)}],
       :temp => [5, /(?<=Temperature=)[\d\.]*/, :f],
       :utility => [7, /(?<=,Utility=)[\d\.]*/, :f],
       :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
@@ -28,6 +28,16 @@ module Avalon
       :blocks => [6, /(?<=Network Blocks=)[\d\.]*/, :i],
       :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
     }
+
+    # Last share converter (Miner-specific)
+    def self.convert_last x
+      y = x[/(?<=Last Share Time=)[\d\.]*/]
+      if y
+        my_time(Time.now.getgm-y.to_i, :relative_time)
+      else
+        "never"
+      end
+    end
 
     def self.print_headers
       puts "\nMiner status as of #{Time.now.getlocal.asctime}:\n#    " +
@@ -53,8 +63,8 @@ module Avalon
 
       status = get_api('summary') + get_api('pools') + get_api('devs')
       # pools = get_api('pools')
+      # p pools[FIELDS[:last][1]]
       # devs = get_api('devs')
-      # p pools, pools[FIELDS[:last][1]]
       # p devs
 
       data = self.class.extract_data_from(status)
@@ -82,7 +92,7 @@ module Avalon
         end
       else
         @fails = 0
-        if self[:mhs] < @min_speed*0.95 and upminutes > 5
+        if self[:mhs] < @min_speed and upminutes > 5
           alarm "Miner #{@num} performance is #{self[:mhs]}, should be #{@min_speed}"
         elsif upminutes < 2
           alarm "Miner #{@num} restarted", "Frog.aiff"

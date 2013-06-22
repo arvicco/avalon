@@ -22,7 +22,7 @@ module Avalon
 
         if @verbose
           total_hash = @nodes.reduce(0) {|hash, node| hash + (node[:mhs] || 0)}
-          puts "Total hash rate: #{total_hash}"
+          puts "Total hash rate: #{total_hash} MHash/sec"
         end
 
         sleep @timeout
