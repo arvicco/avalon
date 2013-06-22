@@ -35,8 +35,9 @@ Monitor script is periodically polling the mining units and other types of objec
     ------- ~/.avalon/monitor.yml --------
     # Prod configuration (default)
     prod:
-      :alert_after: 2      # missed pings or status reports from a miner
       :alert_sound: :aiff  # :none for silent alerts
+      :alert_after: 2      # missed pings or status reports from a miner
+      :alert_temp:  52     # degrees C and above
       :bitcoind:
         :ip: 192.168.1.13
         :rpcuser: jbond

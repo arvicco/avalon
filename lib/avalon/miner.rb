@@ -51,6 +51,7 @@ module Avalon
       @fails = 0
       @alert_after = Avalon::Config[:alert_after] ||
         Avalon::Config[:status_fails_to_alarm] || 2
+      @alert_temp = Avalon::Config[:alert_temp] || 55
       super()
     end
 
@@ -94,6 +95,8 @@ module Avalon
         @fails = 0
         if self[:mhs] < @min_speed and upminutes > 5
           alarm "Miner #{@num} performance is #{self[:mhs]}, should be #{@min_speed}"
+        elsif self[:temp] >= @alert_temp
+          alarm "Miner #{@num} too hot at #{self[:temp]}C, needs cooling", "Ping.aiff"
         elsif upminutes < 2
           alarm "Miner #{@num} restarted", "Frog.aiff"
         end
