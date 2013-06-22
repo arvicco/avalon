@@ -32,10 +32,10 @@ module Avalon
     # Last share converter (Miner-specific)
     def self.convert_last x
       y = x[/(?<=Last Share Time=)[\d\.]*/]
-      if y
-        my_time(Time.now.getgm-y.to_i, :relative_time)
-      else
+      if y.nil? || y == '0'
         "never"
+      else
+        my_time(Time.now.getgm-y.to_i, :relative_time)
       end
     end
 
