@@ -4,9 +4,9 @@ Helper scripts for Bitcoin mining units management...
 
 ## Description
 
-Congrats, you've got a few Bitcoin miners. It's all nice and dandy, but now you need to keep an eye on them to make sure they are always online and their valuable hashes are not wasted. This set of scripts is written to do just that. You run a monitor scipt non-stop and it keeps an eye on your mining units, your (private) pool and your Internet connection, and alerts you in case of any problems. The scripts should work on OSX and Linux (Windows users, move on).
+Congrats, you've got a few Bitcoin miners. It's all nice and dandy, but now you need to keep an eye on them to make sure they are always online and their valuable hashes are not wasted. This set of scripts is written to do just that. You run a monitor script non-stop and it keeps an eye on your mining units, your (private) pool and your Internet connection, and alerts you in case of any problems. The scripts should work on OSX and Linux. Windows users, just spend $30 on Raspberry Pi, it's so much fun.
 
-Initially, the scripts were used to manage an installation of Avalon miners, but they work just as well with any cgminer (or bfgminer) based device with known IP address and cgminer API enabled. It's been proven to work on such exotic devices as Raspberry Pi attached to Block Eruptor Blades as well as normal computers with FPGA or GPU attached. So, you can easily monitor all your mining zoo from one central location.
+Initially, the scripts were used to manage an installation of Avalon miners, but they work just as well with any cgminer (or bfgminer) based device with known IP address and cgminer API enabled. It's been proven to work on such exotic devices as RPi attached to Block Eruptor Blades as well as normal computers with FPGA or GPU attached. So, you can easily monitor your mining zoo from one central location.
 
 ## Usage
 
@@ -14,11 +14,11 @@ Scripts:
 
     $ monitor [environment]
 
-- Monitors all the nodes (miners, pools, Internet connections) that are listed in config/monitor.yml file. Sounds alarm is anything is wrong with the monitored nodes. TODO: takes action to correct errors found (like restarting the failing miners etc).
+Monitors all the nodes (miners, pools, Internet connections) that are listed in config/monitor.yml file. Sounds alarm is anything is wrong with the monitored nodes. TODO: takes action to correct errors found (like restarting the failing miners etc).
 
     $ mtgox_tx
 
-- Transcodes raw transaction from base64 (mtgox) to hex (blockchain) format
+Transcodes raw transaction from base64 (mtgox) to hex (blockchain) format
 
 ## Script Installation
 
@@ -57,7 +57,7 @@ The Mining units need to be configured so that monitor is able to poll them. Spe
 Detailed description of cgminer API and relevant startup options can be found here:
 https://github.com/ckolivas/cgminer/blob/master/API-README
 
-For any Pool or Bitcoind nodes you'd like to monitor, you need to be able to ssh with public keys (that is, no password required) into this Node, otherwise the Monitor won't be able to poll it. How to make it work is beyound the scope of this Readme, just google 'ssh without password'.
+For any Pool or Bitcoind nodes you'd like to monitor, you need to be able to ssh with public keys (that is, no password required) into this Node, otherwise the Monitor won't be able to poll it. How to make it work is beyond the scope of this Readme, just google 'ssh without password'.
 
 ## License
 
