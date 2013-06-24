@@ -96,9 +96,9 @@ module Avalon
         if self[:mhs] < @min_speed and upminutes > 5
           alarm "Miner #{num} performance is #{self[:mhs]}, should be #{@min_speed}"
         elsif self[:temp] >= @alert_temp
-          alarm "Miner #{num} too hot at #{self[:temp]}C, needs cooling", "Ping.aiff"
+          alarm "Miner #{num} too hot at #{self[:temp]}C, needs cooling", :temp_high
         elsif upminutes < 2
-          alarm "Miner #{num} restarted", "Frog.aiff"
+          alarm "Miner #{num} restarted", :restart
         end
       end
     end

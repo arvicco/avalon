@@ -27,10 +27,10 @@ module Avalon
         alarm "Eloipool at #{@ip} not responding to ping"
       elsif self[:found] > @blocks.size
         add_new_blocks `ssh #{@ip} "cat solo/logs/pool.log | grep BLKHASH"`
-        alarm "Eloipool found #{@found} blocks", "Dog.aiff", "Purr.aiff", "Dog.aiff"
+        alarm "Eloipool found #{@found} blocks", :block_found
       elsif @blocks[@blocks.keys.last].pending?
         update_block @blocks[@blocks.keys.last] do
-          alarm "Eloipool last block updated", "Purr.aiff", "Purr.aiff", "Purr.aiff"
+          alarm "Eloipool last block updated", :block_updated
         end
       end
     end

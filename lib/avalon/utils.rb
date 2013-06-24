@@ -10,8 +10,10 @@ module Avalon
     end
 
     # Helper method: play a sound file
-    def play tune
-      unless Avalon::Config[:alert_sound] == :none
+    def play what
+      tunes = [Avalon::Config[:alert_sounds][what] || what].compact.flatten
+
+      tunes.each do |tune|
         file = find_file( tune, "../../../sound/#{tune}",
                           "~/.avalon/sound/#{tune}", "/System/Library/Sounds/#{tune}")
         case system
@@ -25,12 +27,9 @@ module Avalon
     end
 
     # Helper method: sound alarm with message
-    def alarm message, *tunes
+    def alarm message, sound=:failure
       puts message
-
-      tunes.push('Glass.aiff') if tunes.empty?
-
-      tunes.each {|tune| play tune }
+      play sound
     end
 
     # Helper method: ping the Node, return ping time in ms
