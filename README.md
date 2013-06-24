@@ -16,7 +16,7 @@ Scripts:
 
 Monitors all the nodes (miners, pools, Internet connections) that are listed in config/monitor.yml file. Sounds alarm is anything is wrong with the monitored nodes. TODO: takes action to correct errors found (like restarting the failing miners etc).
 
-    $ reset 145 146 192.168.0.150
+    $ reboot_miner 145 146 192.168.0.150
 
 Reboots your Avalon miners. Miners are indicated either by their full IP address or just by the last digits of this address (num). A quick and dirty way to reset misbehaving miners. In some cases of hungup units, soft reset is not enough and a hard powerdown/powerup is required.
 
