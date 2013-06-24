@@ -1,5 +1,6 @@
 require 'pp'
 require 'time'
+require 'yaml'
 
 require "avalon/version"
 require "avalon/utils"

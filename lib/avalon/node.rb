@@ -11,10 +11,14 @@ module Avalon
       subclass.new *args.drop(1)
     end
 
-    attr_accessor :data
+    attr_reader :ip, :data
 
     def initialize
       @data = {}
+    end
+
+    def num
+      @num ||= @ip ? @ip.split('.').last.to_i : ""
     end
 
     # Get a specific data point about this Node
@@ -35,6 +39,11 @@ module Avalon
 
     # Abstract: Report node errors or special situations (if any)
     def report
+      raise "#{self.class} should implement #report"
+    end
+
+    # Abstract: Reset or reboot node
+    def reset
       raise "#{self.class} should implement #report"
     end
 

@@ -2,6 +2,8 @@ module Avalon
 
   class Monitor
 
+    attr_reader :nodes
+
     # List of nodes to monitor
     def initialize opts
       @nodes = opts[:nodes].map {|args| Avalon::Node.create(*args)}

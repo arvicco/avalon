@@ -1,10 +1,9 @@
 #!/usr/bin/env ruby
-# Script to monitor Avalon miners status and alert if something's wrong
+# Script to monitor minering units status and alert if something's wrong
 
 lib = File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'yaml'
 require 'avalon'
 
 env = ARGV[0] || 'prod'

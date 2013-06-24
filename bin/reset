@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+# Script to reboot Avalon miner
+
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+require 'avalon'
+
+Avalon::Config.load 'prod'
+
+monitor = Avalon::Monitor.new Avalon::Config[:monitor]
+
+ARGV.each do |id|
+  miner = monitor.nodes.find {|m| m.num == id}
+  miner ||= monitor.nodes.find {|m| m.ip =~ Regexp.new(id)}
+  if miner
+    miner.reset
+    puts "Miner #{id} reset"
+  else
+    puts "Unable to reset miner #{id}"
+  end
+end

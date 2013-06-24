@@ -32,6 +32,7 @@ module Avalon
     # Last share converter (Miner-specific)
     def self.convert_last x
       y = x[/(?<=Last Share Time=)[\d\.]*/]
+      # p x, y
       if y.nil? || y == '0'
         "never"
       else
@@ -46,7 +47,6 @@ module Avalon
 
     def initialize ip, min_speed
       @ip = ip
-      @num = ip.split('.').last.to_i
       @min_speed = min_speed * 1000 # Gh/s to Mh/s
       @fails = 0
       @alert_after = Avalon::Config[:alert_after] ||
@@ -89,22 +89,27 @@ module Avalon
       if data[:ping].nil?
         @fails += 1
         if @fails >= @alert_after
-          alarm "Miner #{@num} did not respond to status query"
+          alarm "Miner #{num} did not respond to status query"
         end
       else
         @fails = 0
         if self[:mhs] < @min_speed and upminutes > 5
-          alarm "Miner #{@num} performance is #{self[:mhs]}, should be #{@min_speed}"
+          alarm "Miner #{num} performance is #{self[:mhs]}, should be #{@min_speed}"
         elsif self[:temp] >= @alert_temp
-          alarm "Miner #{@num} too hot at #{self[:temp]}C, needs cooling", "Ping.aiff"
+          alarm "Miner #{num} too hot at #{self[:temp]}C, needs cooling", "Ping.aiff"
         elsif upminutes < 2
-          alarm "Miner #{@num} restarted", "Frog.aiff"
+          alarm "Miner #{num} restarted", "Frog.aiff"
         end
       end
     end
 
+    # Reset or reboot Miner
+    def reset
+      `ssh root@#{ip} "reboot"`
+    end
+
     def to_s
-      "#{@num}: " + FIELDS.map {|key, (width, _, _ )| @data[key].to_s.ljust(width)}.join(" ")
+      "#{num}: " + FIELDS.map {|key, (width, _, _ )| @data[key].to_s.ljust(width)}.join(" ")
     end
 
   end
