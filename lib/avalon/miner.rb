@@ -19,7 +19,7 @@ module Avalon
       :last => [8, /(?<=Status=Alive,).*?Last Share Time=[\d\.]*/,
                 ->(x){ convert_last(x)}],
       :temp => [5, /(?<=Temperature=)[\d\.]*/, :f],
-      :utility => [7, /(?<=,Utility=)[\d\.]*/, :f],
+      :utility => [8, /(?<=,Work Utility=)[\d\.]*/, :f],
       :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
       :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
       :rejected => [8, /(?<=Rejected=)[\d\.]*/, :i],
