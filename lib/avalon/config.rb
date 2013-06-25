@@ -13,6 +13,13 @@ module Avalon
       @config[:block_file] =  find_file( '../../../config/blocks.yml', '~/.avalon/blocks.yml') ||
         File.expand_path('~/.avalon/blocks.yml')
 
+      @config[:alert_sounds] ||= {
+        failure: 'Glass.aiff',
+        restart: 'Frog.aiff',
+        temp_high: 'Ping.aiff',
+        block_found: ['Dog.aiff', 'Purr.aiff', 'Dog.aiff'],
+        block_updated: ['Purr.aiff', 'Purr.aiff', 'Purr.aiff']
+      }
     end
 
     def self.[] key
