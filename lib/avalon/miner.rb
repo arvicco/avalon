@@ -20,6 +20,8 @@ module Avalon
                 ->(x){ convert_last(x)}],
       :temp => [4, /(?<=Temperature=)[\d\.]*/, :i],
       :freq => [4, /(?<=frequency=)[\d\.]*/, :i],
+      :fan2 => [4, /(?<=fan2=)[\d\.]*/, :i],
+      :fan3 => [4, /(?<=fan3=)[\d\.]*/, :i],
       :utility => [8, /(?<=,Work Utility=)[\d\.]*/, :f],
       :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
       :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
@@ -27,7 +29,7 @@ module Avalon
       :stale => [6, /(?<=Stale=)[\d\.]*/, :i],
       :errors => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
       :blocks => [6, /(?<=Network Blocks=)[\d\.]*/, :i],
-      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
+#      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
     }
 
     # Last share converter (Miner-specific)
