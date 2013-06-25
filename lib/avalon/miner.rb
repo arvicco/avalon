@@ -18,7 +18,8 @@ module Avalon
       :uptime => [9, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
       :last => [8, /(?<=Status=Alive,).*?Last Share Time=[\d\.]*/,
                 ->(x){ convert_last(x)}],
-      :temp => [5, /(?<=Temperature=)[\d\.]*/, :f],
+      :temp => [4, /(?<=Temperature=)[\d\.]*/, :i],
+      :freq => [4, /(?<=frequency=)[\d\.]*/, :i],
       :utility => [8, /(?<=,Work Utility=)[\d\.]*/, :f],
       :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
       :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
@@ -62,7 +63,7 @@ module Avalon
     def poll verbose=true
       self[:ping] = ping @ip
 
-      status = get_api('summary') + get_api('pools') + get_api('devs')
+      status = get_api('summary') + get_api('pools') + get_api('devs') + get_api('stats')
       # pools = get_api('pools')
       # p pools[FIELDS[:last][1]]
       # devs = get_api('devs')
