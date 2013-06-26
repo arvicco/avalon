@@ -109,7 +109,7 @@ module Avalon
             alarm "Miner #{num} last shares was #{duration(self[:last])} min ago", :last_share
           elsif temp >= @config[:alert_temp_high]
             alarm "Miner #{num} too hot at #{temp}°C, needs cooling", :temp_high
-          elsif temp <= @config[:alert_temp_low]
+          elsif self[:freq] && temp <= @config[:alert_temp_low]
             alarm "Miner #{num} temp low at #{temp}°C, is it hashing at all?", :temp_low
           end
         end

@@ -41,7 +41,7 @@ Monitor script is periodically polling the mining units and other types of objec
     prod:
       :alert_after:       2     # missed pings or status reports from a miner
       :alert_temp_high:  52     # degrees C and above
-      :alert_temp_low:   30     # degrees C and below
+      :alert_temp_low:   30     # degrees C and below, Avalon miners only
       :alert_last_share:  2     # minutes since last share hashed
       :alert_sounds:
         :failure:       Glass.aiff                        # [] for no sound
