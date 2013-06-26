@@ -32,6 +32,16 @@ module Avalon
       play sound
     end
 
+    # Helper method: from time string 'hh:mm:ss' to duration in minutes
+    def duration time_string
+      if time_string == 'never'
+        'never'
+      else
+        hour, min, sec = *time_string.split(/:/).map(&:to_i)
+        hour*60.0 + min + sec/60.0
+      end
+    end
+
     # Helper method: ping the Node, return ping time in ms
     def ping ip
       ping_result = `ping -c 1 #{ip}`
