@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Avalon
   # "STATUS=S,When=1368715953,Code=11,Msg=Summary,Description=cgminer 2.10.5|
   #  SUMMARY,Elapsed=58219,MHS av=70827.84,Found Blocks=0,Getworks=1899,Accepted=14755,
@@ -18,24 +20,24 @@ module Avalon
       :uptime => [9, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
       :last => [8, /(?<=Status=Alive,).*?Last Share Time=[\d\.]*/,
                 ->(x){ convert_last(x)}],
-      :temp => [4, /(?<=Temperature=)[\d\.]*/, :i],
+      :miner => [5, /(?<=Description=cgminer )[\d\.]*/, :s],
       :freq => [4, /(?<=frequency=)[\d\.]*/, :i],
+      :'°C' => [2, /(?<=Temperature=)[\d\.]*/, :i],
       :fan2 => [4, /(?<=fan2=)[\d\.]*/, :i],
       :fan3 => [4, /(?<=fan3=)[\d\.]*/, :i],
-      :utility => [8, /(?<=,Work Utility=)[\d\.]*/, :f],
+      :wu => [4, /(?<=,Work Utility=)[\d\.]*/, :i],
       :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
       :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
       :rejected => [8, /(?<=Rejected=)[\d\.]*/, :i],
       :stale => [6, /(?<=Stale=)[\d\.]*/, :i],
       :errors => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
       :blocks => [6, /(?<=Network Blocks=)[\d\.]*/, :i],
-#      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
+      #      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
     }
 
     # Last share converter (Miner-specific)
     def self.convert_last x
       y = x[/(?<=Last Share Time=)[\d\.]*/]
-      # p x, y
       if y.nil? || y == '0'
         "never"
       else
@@ -48,13 +50,11 @@ module Avalon
         FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
     end
 
-    def initialize ip, min_speed
+    def initialize ip, min_speed, config=Avalon::Config.config
       @ip = ip
       @min_speed = min_speed * 1000 # Gh/s to Mh/s
+      @config = config
       @fails = 0
-      @alert_after = Avalon::Config[:alert_after] ||
-        Avalon::Config[:status_fails_to_alarm] || 2
-      @alert_temp = Avalon::Config[:alert_temp] || 55
       super()
     end
 
@@ -66,6 +66,7 @@ module Avalon
       self[:ping] = ping @ip
 
       status = get_api('summary') + get_api('pools') + get_api('devs') + get_api('stats')
+      # p get_api('summary')
       # pools = get_api('pools')
       # p pools[FIELDS[:last][1]]
       # devs = get_api('devs')
@@ -83,25 +84,34 @@ module Avalon
     end
 
     def upminutes
-      hour, min, _ = *self[:uptime].split(/:/).map(&:to_i)
-      hour*60 + min
+      duration(self[:uptime])
+    end
+
+    def temp
+      self[:'°C']
     end
 
     # Check for any exceptional situations in stats, sound alarm if any
     def report
       if data[:ping].nil?
         @fails += 1
-        if @fails >= @alert_after
-          alarm "Miner #{num} did not respond to status query"
+        if @fails >= @config[:alert_after]
+          alarm "Miner #{num} did not respond to status query", :failure
         end
       else
         @fails = 0
-        if self[:mhs] < @min_speed and upminutes > 5
-          alarm "Miner #{num} performance is #{self[:mhs]}, should be #{@min_speed}"
-        elsif self[:temp] >= @alert_temp
-          alarm "Miner #{num} too hot at #{self[:temp]}C, needs cooling", :temp_high
-        elsif upminutes < 2
+        if duration(self[:uptime]) < 2
           alarm "Miner #{num} restarted", :restart
+        elsif duration(self[:uptime]) > 5 # Miner settled down
+          if self[:mhs] < @min_speed
+            alarm "Miner #{num} performance is #{self[:mhs]}, should be #{@min_speed}", :perf_low
+          elsif self[:last] == 'never' || duration(self[:last]) > @config[:alert_last_share]
+            alarm "Miner #{num} last shares was #{duration(self[:last])} min ago", :last_share
+          elsif temp >= @config[:alert_temp_high]
+            alarm "Miner #{num} too hot at #{temp}°C, needs cooling", :temp_high
+          elsif temp <= @config[:alert_temp_low]
+            alarm "Miner #{num} temp low at #{temp}°C, is it hashing at all?", :temp_low
+          end
         end
       end
     end
