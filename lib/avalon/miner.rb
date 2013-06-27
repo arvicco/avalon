@@ -38,10 +38,11 @@ module Avalon
     # Last share converter (Miner-specific)
     def self.convert_last x
       y = x[/(?<=Last Share Time=)[\d\.]*/]
+
       if y.nil? || y == '0'
         "never"
       else
-        my_time(Time.now.getgm-y.to_i, :relative_time)
+        my_time(Time.now.getgm.to_i-y.to_i, :relative_time)
       end
     end
 
@@ -91,6 +92,10 @@ module Avalon
       self[:'°C']
     end
 
+    def last
+      duration(self[:last])
+    end
+
     # Check for any exceptional situations in stats, sound alarm if any
     def report
       if data[:ping].nil?
@@ -105,8 +110,8 @@ module Avalon
         elsif duration(self[:uptime]) > 5 # Miner settled down
           if self[:mhs] < @min_speed
             alarm "Miner #{num} performance is #{self[:mhs]}, should be #{@min_speed}", :perf_low
-          elsif self[:last] == 'never' || duration(self[:last]) > @config[:alert_last_share]
-            alarm "Miner #{num} last shares was #{duration(self[:last])} min ago", :last_share
+          elsif last == 'never' || last > @config[:alert_last_share]
+            alarm "Miner #{num} last shares was #{last} min ago", :last_share
           elsif temp >= @config[:alert_temp_high]
             alarm "Miner #{num} too hot at #{temp}°C, needs cooling", :temp_high
           elsif self[:freq] && temp <= @config[:alert_temp_low]

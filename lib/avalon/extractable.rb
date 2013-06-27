@@ -5,7 +5,8 @@ module Avalon
 
     # type = :absolute_time | :absolute_date | :relative_time
     def my_time t, type=:absolute_time
-      time = Time.at(t.to_f)
+      t = t.to_f < 0 ? 0 : t.to_f
+      time = Time.at(t)
       case type
       when :absolute_date
         time.getlocal.strftime("%Y-%m-%d %H:%M:%S")

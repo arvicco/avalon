@@ -38,7 +38,7 @@ module Avalon
         'never'
       else
         hour, min, sec = *time_string.split(/:/).map(&:to_i)
-        hour*60.0 + min + sec/60.0
+        (hour*60.0 + min + sec/60.0).round(2)
       end
     end
 
