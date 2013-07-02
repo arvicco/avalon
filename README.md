@@ -60,7 +60,7 @@ Monitor script is periodically polling the mining units and other types of objec
         :verbose: true
         :timeout: 30
         :nodes:
-          - [btcguild, 'stratum.btcguild.com', 'http://www.btcguild.com', 'api.php?api_key=', yoursecretapikey]
+          - [btcguild, stratum.btcguild.com, apikey] # ping url, your API key
           - [miner, 192.168.1.151, 70, jbond_151] # type, ip, gh/s, pool_name(optional)
           - [miner, 192.168.1.152, 82, jbond_15]
           - [miner, 192.168.1.153, 40]

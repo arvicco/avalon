@@ -6,10 +6,13 @@ module Avalon
   # Extracts Btcguild pool info
   class Btcguild < Node
 
-    def initialize monitor, mining_url, api_url, api_path, api_key
-      @mining_url, @api_url, @api_path, @api_key = mining_url, api_url, api_path, api_key
+    API_URL = 'http://www.btcguild.com'
+    API_PATH = 'api.php?api_key='
 
-      @conn ||= Faraday.new(:url => @api_url) do |faraday|
+    def initialize monitor, ping_url, api_key
+      @ping_url, @api_key = ping_url, api_key
+
+      @conn ||= Faraday.new(:url => API_URL) do |faraday|
         # faraday.response :logger                  # log requests to STDOUT
         faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
       end
@@ -18,7 +21,7 @@ module Avalon
     end
 
     def get
-      reply = @conn.get "#{@api_path}#{@api_key}"
+      reply = @conn.get "#{API_PATH}#{@api_key}"
       if reply.success? && !(reply.body =~ /too many API requests/)
         JSON.parse(reply.body, :symbolize_names => true)
       else
@@ -27,7 +30,7 @@ module Avalon
     end
 
     def poll verbose=true
-      @data[:ping] = ping @mining_url
+      @data[:ping] = ping @ping_url
 
       if @data[:ping]
         @data.merge!(get || {})
