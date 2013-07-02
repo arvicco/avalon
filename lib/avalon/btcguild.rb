@@ -50,7 +50,7 @@ module Avalon
     end
 
     def to_s
-      "BTC Guild: #{pool_speed}TH/s ping:#{self[:ping]} diff:#{diff}M " +
+      "\nBTC Guild: #{pool_speed}TH/s ping:#{self[:ping]} diff:#{diff}M " +
         "unpaid(24h) btc: #{unpaid}(#{past24}) nmc: #{unpaid_nmc}(#{past24_nmc})"
         end
 

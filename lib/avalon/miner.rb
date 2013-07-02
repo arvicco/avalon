@@ -17,7 +17,8 @@ module Avalon
     FIELDS = {
       :unit => [6, /(?<=MHS av=)[\d\.]*/, :i],
       :pool => [6, /./, nil], # not in miner status string...
-      :ping => [5, /./, nil],  # not in miner status string...
+      :ping => [6, /./, nil],  # not in miner status string...
+      :rst => [3, /./, nil],  # not in miner status string...
       :uptime => [9, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
       :last => [8, /(?<=Status=Alive,).*?Last Share Time=[\d\.]*/,
                 ->(x){ convert_last(x)}],
@@ -68,16 +69,13 @@ module Avalon
       self[:ping] = ping @ip
 
       status = get_api('summary') + get_api('pools') + get_api('devs') + get_api('stats')
+      @poll_time = Time.now
       # p get_api('summary')
-      # pools = get_api('pools')
-      # p pools[FIELDS[:last][1]]
-      # devs = get_api('devs')
-      # p devs
 
       data = self.class.extract_data_from(status)
 
       if data.empty?
-        @data = {:ping => self[:ping]}
+        @data = {:ping => self[:ping], :rst => self[:rst]}
       else
         @data.merge! data
         if @config[:monitor][:per_hour]
@@ -96,12 +94,16 @@ module Avalon
       duration(self[:uptime])
     end
 
-    def temp
-      self[:'°C']
-    end
-
     def last
       duration(self[:last])
+    end
+
+    def restart_time
+      @poll_time - upminutes * 60.0
+    end
+
+    def temp
+      self[:'°C']
     end
 
     def unit_hash
@@ -123,9 +125,14 @@ module Avalon
         end
       else
         @fails = 0
-        if duration(self[:uptime]) < 2
+        @last_restart ||= restart_time
+
+        # Detect Miner reset correctly
+        if (restart_time - @last_restart) > 20
+          @last_restart = restart_time
+          self[:rst] = (self[:rst] || 0) + 1
           alarm "Miner #{num} restarted", :restart
-        elsif duration(self[:uptime]) > 5 # Miner settled down
+        elsif upminutes > 5 # Miner settled down
           if unit_hash < @min_mhs
             alarm "Miner #{num} performance is #{unit_hash}, should be #{@min_mhs}", :perf_low
           elsif last == 'never' || last > @config[:alert_last_share]
