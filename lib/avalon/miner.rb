@@ -32,7 +32,7 @@ module Avalon
       :reject => [6, /(?<=Rejected=)[\d\.]*/, :i],
       :stale => [5, /(?<=Stale=)[\d\.]*/, :i],
       :error => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
-      :block => [5, /(?<=Network Blocks=)[\d\.]*/, :i],
+      # :block => [5, /(?<=Network Blocks=)[\d\.]*/, :i],
       #      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
     }
 
@@ -80,6 +80,11 @@ module Avalon
         @data = {:ping => self[:ping]}
       else
         @data.merge! data
+        if @config[:monitor][:per_hour]
+          [:getwork, :accept, :reject, :stale, :error].each do |key|
+            self[key] = (self[key]/upminutes*60).round(1) if self[key]
+          end
+        end
       end
 
       self[:pool] = pool_hash
