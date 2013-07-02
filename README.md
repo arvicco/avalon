@@ -59,7 +59,7 @@ Monitor script is periodically polling the mining units and other types of objec
       :monitor:
         :verbose: true
         :timeout: 30
-      :per_hour:  true  # If true, getworks, rejects... metrics will be displayed PER HOUR
+        :per_hour:  true  # If true, getworks, rejects... metrics will be displayed PER HOUR
         :nodes:
           - [btcguild, stratum.btcguild.com, apikey] # ping url, your API key
           - [miner, 192.168.1.151, 70, jbond_151] # type, ip, gh/s, pool_name(optional)
