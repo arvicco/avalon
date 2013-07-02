@@ -2,14 +2,15 @@ module Avalon
 
   class Monitor
 
-    attr_reader :nodes, :switches
+    attr_reader :nodes, :switches, :pool
 
     # List of nodes to monitor
     def initialize opts
       @timeout = opts[:timeout] || 30
       @verbose = opts[:verbose]
       @switches = (opts[:switches] || []).map {|args| Avalon::Switch.new(*args)}
-      @nodes = opts[:nodes].map {|args| Avalon::Node.create(*args)}
+      @nodes = opts[:nodes].map {|args| Avalon::Node.create(self, *args)}
+      @pool = @nodes.find {|node| node.is_a?(Avalon::Btcguild)}
     end
 
     def run
@@ -30,8 +31,9 @@ module Avalon
         @nodes.each {|node| node.report}
 
         if @verbose
-          total_hash = @nodes.reduce(0) {|hash, node| hash + (node[:mhs] || 0)}
-          puts "Total hash rate: #{total_hash} MHash/sec"
+          unit_hash = @nodes.reduce(0) {|hash, node| hash + (node.unit_hash || 0)}
+          pool_hash = @nodes.reduce(0) {|hash, node| hash + (node.pool_hash || 0)}
+          puts "Total hash rate (from pool): #{unit_hash} (#{pool_hash}) MH/s"
         end
 
         sleep @timeout

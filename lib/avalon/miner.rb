@@ -15,8 +15,9 @@ module Avalon
 
     # Field formats: name => [width, pattern, type/conversion]
     FIELDS = {
-      :ping => [8, /./, nil],  # not in miner status string...
-      :mhs => [6, /(?<=MHS av=)[\d\.]*/, :i],
+      :unit => [6, /(?<=MHS av=)[\d\.]*/, :i],
+      :pool => [6, /./, nil], # not in miner status string...
+      :ping => [5, /./, nil],  # not in miner status string...
       :uptime => [9, /(?<=Elapsed=)[\d\.]*/, ->(x){ my_time(x, :relative_time)}],
       :last => [8, /(?<=Status=Alive,).*?Last Share Time=[\d\.]*/,
                 ->(x){ convert_last(x)}],
@@ -25,13 +26,13 @@ module Avalon
       :'°C' => [2, /(?<=Temperature=)[\d\.]*/, :i],
       :fan2 => [4, /(?<=fan2=)[\d\.]*/, :i],
       :fan3 => [4, /(?<=fan3=)[\d\.]*/, :i],
-      :wu => [4, /(?<=,Work Utility=)[\d\.]*/, :i],
-      :getworks => [8, /(?<=Getworks=)[\d\.]*/, :i],
-      :accepted => [8, /(?<=,Accepted=)[\d\.]*/, :i],
-      :rejected => [8, /(?<=Rejected=)[\d\.]*/, :i],
-      :stale => [6, /(?<=Stale=)[\d\.]*/, :i],
-      :errors => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
-      :blocks => [6, /(?<=Network Blocks=)[\d\.]*/, :i],
+      :WU => [4, /(?<=,Work Utility=)[\d\.]*/, :i],
+      :getwork => [7, /(?<=Getworks=)[\d\.]*/, :i],
+      :accept => [6, /(?<=,Accepted=)[\d\.]*/, :i],
+      :reject => [6, /(?<=Rejected=)[\d\.]*/, :i],
+      :stale => [5, /(?<=Stale=)[\d\.]*/, :i],
+      :error => [6, /(?<=Hardware Errors=)[\d\.]*/, :i],
+      :block => [5, /(?<=Network Blocks=)[\d\.]*/, :i],
       #      :found => [2, /(?<=Found Blocks=)[\d\.]*/, :i],
     }
 
@@ -47,14 +48,14 @@ module Avalon
     end
 
     def self.print_headers
-      puts "\nMiner status as of #{Time.now.getlocal.asctime}:\n#    " +
-        FIELDS.map {|name, (width,_,_ )| name.to_s.ljust(width)}.join(' ')
+      puts "\nMiner status as of #{Time.now.getlocal.asctime}:\nmhs: " +
+        FIELDS.map {|name, (width,_,_ )| name.to_s.rjust(width)}.join(' ')
     end
 
-    def initialize ip, min_speed, config=Avalon::Config.config
-      @ip = ip
-      @min_speed = min_speed * 1000 # Gh/s to Mh/s
-      @config = config
+    def initialize monitor, ip, min_mhs, worker_name=nil
+      @ip, @min_mhs, @worker_name = ip, min_mhs*1000 , worker_name
+      @monitor = monitor
+      @config = Avalon::Config.config # TODO: monitor.config?
       @fails = 0
       super()
     end
@@ -76,10 +77,12 @@ module Avalon
       data = self.class.extract_data_from(status)
 
       if data.empty?
-        @data = {}
+        @data = {:ping => self[:ping]}
       else
         @data.merge! data
       end
+
+      self[:pool] = pool_hash
 
       puts "#{self}" if verbose
     end
@@ -96,9 +99,19 @@ module Avalon
       duration(self[:last])
     end
 
+    def unit_hash
+      self[:unit] || 0
+    end
+
+    def pool_hash
+      if @monitor.pool && @worker_name && @monitor.pool[:workers] && @monitor.pool[:workers][@worker_name]
+        @monitor.pool[:workers][@worker_name][:hash_rate].round(0)
+      end
+    end
+
     # Check for any exceptional situations in stats, sound alarm if any
     def report
-      if data[:ping].nil?
+      if data[:ping].nil? || data[:unit].nil?
         @fails += 1
         if @fails >= @config[:alert_after]
           alarm "Miner #{num} did not respond to status query", :failure
@@ -108,8 +121,8 @@ module Avalon
         if duration(self[:uptime]) < 2
           alarm "Miner #{num} restarted", :restart
         elsif duration(self[:uptime]) > 5 # Miner settled down
-          if self[:mhs] < @min_speed
-            alarm "Miner #{num} performance is #{self[:mhs]}, should be #{@min_speed}", :perf_low
+          if unit_hash < @min_mhs
+            alarm "Miner #{num} performance is #{unit_hash}, should be #{@min_mhs}", :perf_low
           elsif last == 'never' || last > @config[:alert_last_share]
             alarm "Miner #{num} last shares was #{last} min ago", :last_share
           elsif temp >= @config[:alert_temp_high]
@@ -127,7 +140,7 @@ module Avalon
     end
 
     def to_s
-      "#{num}: " + FIELDS.map {|key, (width, _, _ )| @data[key].to_s.ljust(width)}.join(" ")
+      "#{num}: " + FIELDS.map {|key, (width, _, _ )| @data[key].to_s.rjust(width)}.join(" ")
     end
 
   end

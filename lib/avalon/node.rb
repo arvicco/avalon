@@ -6,9 +6,9 @@ module Avalon
     include Utils # Helper methods
 
     # Builder method for creating Node subclasses from config arrays
-    def Node.create *args
+    def Node.create monitor, *args
       subclass = Avalon.const_get(args.first.capitalize)
-      subclass.new *args.drop(1)
+      subclass.new monitor, *args.drop(1)
     end
 
     attr_reader :ip, :data
@@ -29,6 +29,14 @@ module Avalon
     # Set a specific data point
     def []= key, value
       @data[key] = value
+    end
+
+    ### Node API: following methods should be defined:
+
+    def unit_hash
+    end
+
+    def pool_hash
     end
 
     # Abstract: Check node status

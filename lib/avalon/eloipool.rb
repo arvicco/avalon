@@ -2,7 +2,7 @@ module Avalon
   # Pool is a node encapsulating pool software
   class Eloipool < Node
 
-    def initialize ip, frequency
+    def initialize monitor, ip, frequency
       @ip, @frequency = ip, frequency
       @update_num = 0
       @block_file = Avalon::Config[:block_file]

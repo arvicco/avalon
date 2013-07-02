@@ -46,7 +46,7 @@ module Avalon
     def ping ip
       ping_result = `ping -c 1 #{ip}`
       if ping_result =~ /( | 0.)0% packet loss/
-        ping_result.match(/time=([\.\d]*) ms/)[1].to_f
+        ping_result.match(/time=([\.\d]*) ms/)[1].to_f.round(1)
       end
     end
 

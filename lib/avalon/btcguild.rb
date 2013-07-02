@@ -6,7 +6,7 @@ module Avalon
   # Extracts Btcguild pool info
   class Btcguild < Node
 
-    def initialize mining_url, api_url, api_path, api_key
+    def initialize monitor, mining_url, api_url, api_path, api_key
       @mining_url, @api_url, @api_path, @api_key = mining_url, api_url, api_path, api_key
 
       @conn ||= Faraday.new(:url => @api_url) do |faraday|
@@ -47,8 +47,8 @@ module Avalon
     end
 
     def to_s
-      "BTC Guild: #{pool_hash}TH/s ping:#{self[:ping]} diff:#{diff}M " +
-        "24h(unpaid) btc: #{past24}(#{unpaid}) nmc: #{past24_nmc}(#{unpaid_nmc})"
+      "BTC Guild: #{pool_speed}TH/s ping:#{self[:ping]} diff:#{diff}M " +
+        "unpaid(24h) btc: #{unpaid}(#{past24}) nmc: #{unpaid_nmc}(#{past24_nmc})"
         end
 
     ### Convenience data accessors
@@ -63,11 +63,11 @@ module Avalon
     end
 
     def past24
-      access :user, :past_24h_rewards, 3
+      access :user, :past_24h_rewards, 2
     end
 
     def unpaid
-      access :user, :unpaid_rewards, 4
+      access :user, :unpaid_rewards, 3
     end
 
     def past24_nmc
@@ -78,7 +78,7 @@ module Avalon
       access :user, :unpaid_rewards_nmc, 2
     end
 
-    def pool_hash
+    def pool_speed
       access :pool, :pool_speed, 1, 1000.0
     end
 

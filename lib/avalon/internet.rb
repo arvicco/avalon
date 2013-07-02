@@ -3,7 +3,7 @@ module Avalon
   # Internet is a node encapsulating information about Internet connectivity
   class Internet < Node
 
-    def initialize *sites
+    def initialize monitor, *sites
       @sites = Hash[ *sites.map {|site| [site.split(/\./)[-2].to_sym, site]}.flatten ]
       super()
     end
