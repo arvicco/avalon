@@ -3,8 +3,7 @@ module Avalon
   class Eloipool < Node
 
     def initialize ip, frequency
-      @ip = ip
-      @update_frequency = frequency
+      @ip, @frequency = ip, frequency
       @update_num = 0
       @block_file = Avalon::Config[:block_file]
       @blocks = load_blocks || {}
@@ -55,7 +54,7 @@ module Avalon
     end
 
     def update_old_block
-      if rand(@update_frequency) == 0 # update once per @frequency polls
+      if rand(@frequency) == 0 # update once per @frequency polls
         hash = @blocks.keys[@update_num]
         if @blocks[hash]
           @update_num += 1
