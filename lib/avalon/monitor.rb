@@ -2,22 +2,29 @@ module Avalon
 
   class Monitor
 
-    attr_reader :nodes
+    attr_reader :nodes, :switches
 
     # List of nodes to monitor
     def initialize opts
-      @nodes = opts[:nodes].map {|args| Avalon::Node.create(*args)}
       @timeout = opts[:timeout] || 30
       @verbose = opts[:verbose]
+      @switches = (opts[:switches] || []).map {|args| Avalon::Switch.new(*args)}
+      @nodes = opts[:nodes].map {|args| Avalon::Node.create(*args)}
     end
 
     def run
       loop do
 
-        Avalon::Miner.print_headers if @verbose
-
         # Check status for all nodes
-        @nodes.each {|node| node.poll(@verbose)}
+        @nodes.inject(false) do |headers_printed, node|
+          # Print miners headers once first miner encountered
+          if @verbose && node.is_a?(Avalon::Miner) && !headers_printed
+            Avalon::Miner.print_headers
+            headers_printed = true
+          end
+          node.poll(@verbose)
+          headers_printed
+        end
 
         # Report node errors (if any)
         @nodes.each {|node| node.report}
