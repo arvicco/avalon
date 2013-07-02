@@ -14,7 +14,7 @@ Scripts:
 
     $ monitor [environment]
 
-Monitors all the nodes (miners, pools, Internet connections) that are listed in config/monitor.yml file. Sounds alarm is anything is wrong with the monitored nodes. TODO: takes action to correct errors found (like restarting the failing miners etc).
+Monitors all the nodes (miners, pools, Internet connections) that are listed in config/monitor.yml file. Sounds alarm if anything goes wrong with the monitored nodes. Alarm sounds are configurable. TODO: takes action to correct errors found (like restarting the failing miners etc).
 
     $ reboot_miner 145 146 192.168.0.150
 
@@ -40,14 +40,17 @@ Monitor script is periodically polling the mining units and other types of objec
     # Prod configuration (default)
     prod:
       :alert_after:       2     # missed pings or status reports from a miner
-      :alert_temp_high:  52     # degrees C and above
+      :alert_temp_high:  55     # degrees C and above
       :alert_temp_low:   30     # degrees C and below, Avalon miners only
       :alert_last_share:  2     # minutes since last share hashed
       :alert_sounds:
-        :failure:       Glass.aiff                        # [] for no sound
         :restart:       Frog.aiff                         # [] for no sound
-        :temp_high:     Ping.aiff                         # [] for no sound
-        :block_found:   [Dog.aiff, Purr.aiff, Dog.aiff]   # [] for no sound
+        :failure:       Glass.aiff
+        :perf_low:      Glass.aiff
+        :last_share:    Glass.aiff
+        :temp_high:     Ping.aiff
+        :temp_low:      Ping.aiff
+        :block_found:   [Dog.aiff, Purr.aiff, Dog.aiff]
         :block_updated: [Purr.aiff, Purr.aiff, Purr.aiff] # [] for no alert sound
       :bitcoind:
         :ip: 192.168.1.13
@@ -57,6 +60,7 @@ Monitor script is periodically polling the mining units and other types of objec
         :verbose: true
         :timeout: 30
         :nodes:
+          - [btcguild, 'stratum.btcguild.com', 'http://www.btcguild.com', 'api.php?api_key=', 'yoursecretapikey']
           - [miner, 192.168.1.151, 70] # type, ip, gh/s
           - [miner, 192.168.1.152, 70]
           - [internet, www.google.com, www.speedtest.net]
