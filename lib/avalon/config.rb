@@ -25,7 +25,15 @@ module Avalon
         File.expand_path('~/.avalon/blocks.yml')
 
       # Setting defaults
-      @config[:alert_sounds] = DEFAULT_SOUNDS.merge(@config[:alert_sounds] || {})
+      @config[:alert_sounds] = 
+        case @config[:alert_sounds]
+        when Symbol, false
+          @config[:alert_sounds]
+        when Hash  
+          DEFAULT_SOUNDS.merge @config[:alert_sounds]
+        when true, nil
+          DEFAULT_SOUNDS  
+        end  
       @config[:alert_last_share] ||= 2
       @config[:alert_after] ||= @config[:status_fails_to_alarm] || 2
       @config[:alert_temp_high] ||= @config[:alert_temp] || 55

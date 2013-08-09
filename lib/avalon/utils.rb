@@ -11,17 +11,21 @@ module Avalon
 
     # Helper method: play a sound file
     def play what
-      tunes = [Avalon::Config[:alert_sounds][what] || what].compact.flatten
+      case Avalon::Config[:alert_sounds]
+      when false, :none, :no
+      when Hash
+        tunes = [Avalon::Config[:alert_sounds][what] || what].compact.flatten
 
-      tunes.each do |tune|
-        file = find_file( tune, "../../../sound/#{tune}",
-                          "~/.avalon/sound/#{tune}", "/System/Library/Sounds/#{tune}")
-        case system
-        when 'Darwin'
-          `afplay #{file}`
-        when 'Linux'
-          raise 'Please install sox package: sudo apt-get install sox' if `which sox`.empty?
-          `play -q #{file}`
+        tunes.each do |tune|
+          file = find_file( tune, "../../../sound/#{tune}",
+                            "~/.avalon/sound/#{tune}", "/System/Library/Sounds/#{tune}")
+          case system
+          when 'Darwin'
+            `afplay #{file}`
+          when 'Linux'
+            raise 'Please install sox package: sudo apt-get install sox' if `which sox`.empty?
+            `play -q #{file}`
+          end
         end
       end
     end
@@ -29,7 +33,7 @@ module Avalon
     # Helper method: sound alarm with message
     def alarm message, sound=:failure
       puts message
-      play sound
+      play sound 
     end
 
     # Helper method: from time string 'hh:mm:ss' to duration in minutes
