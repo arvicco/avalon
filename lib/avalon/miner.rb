@@ -132,14 +132,16 @@ module Avalon
           @last_restart = restart_time
           self[:rst] = (self[:rst] || 0) + 1
           alarm "Miner #{num} restarted", :restart
+        elsif unit_hash == 0 && last == 'never' && temp == 0
+          alarm "Miner #{num} is stuck in error state!!!", :failure
         elsif upminutes > 5 # Miner settled down
           if unit_hash < @min_mhs
             alarm "Miner #{num} performance is #{unit_hash}, should be #{@min_mhs}", :perf_low
           elsif last == 'never' || last > @config[:alert_last_share]
             alarm "Miner #{num} last shares was #{last} min ago", :last_share
-          elsif temp >= @config[:alert_temp_high]
+          elsif temp && temp >= @config[:alert_temp_high]
             alarm "Miner #{num} too hot at #{temp}°C, needs cooling", :temp_high
-          elsif self[:freq] && temp <= @config[:alert_temp_low]
+          elsif self[:freq] && temp && temp <= @config[:alert_temp_low]
             alarm "Miner #{num} temp low at #{temp}°C, is it hashing at all?", :temp_low
           end
         end
