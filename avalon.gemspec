@@ -11,6 +11,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Avalon miners monitor}
   gem.summary       = %q{Avalon miners monitor and set of helper scripts}
   gem.homepage      = "https://github.com/arvicco/avalon"
+  gem.licenses      = ['MIT', 'GPL-2']
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
@@ -18,5 +19,4 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'faraday', '~> 0.8'
-
 end
