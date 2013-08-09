@@ -154,7 +154,8 @@ module Avalon
     end
 
     def to_s
-      "#{num}: " + FIELDS.map {|key, (width, _, _ )| @data[key].to_s.rjust(width)}.join(" ")
+      num.to_s.rjust(3) + ": " + 
+        FIELDS.map {|key, (width, _, _ )| @data[key].to_s.rjust(width)}.join(" ")
     end
 
   end
