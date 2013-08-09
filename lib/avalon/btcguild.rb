@@ -25,8 +25,10 @@ module Avalon
       if reply.success? && !(reply.body =~ /too many API requests/)
         JSON.parse(reply.body, :symbolize_names => true)
       else
-        {}
+       {} 
       end
+    rescue Faraday::Error::TimeoutError
+      {}
     end
 
     def poll verbose=true
